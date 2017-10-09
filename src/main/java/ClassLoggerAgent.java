@@ -1,7 +1,4 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import fi.iki.elonen.NanoHTTPD;
 
 import java.io.File;
@@ -36,15 +33,16 @@ public class ClassLoggerAgent extends NanoHTTPD {
             session.parseBody(input);
         } catch (Exception e) {
         }
-        Map<String, String> parms = session.getParms();
+        JsonArray array = transformer.destroyContext();
+        JsonObject json = new JsonParser().parse(input.get("postData")).getAsJsonObject();
 
-        if ("start".equals(parms.get("event"))) {
+        if ("start".equals(json.get("event").getAsString())) {
             transformer.createContext();
         } else {
-            JsonArray array = transformer.destroyContext();
+
             JsonObject object = new JsonObject();
-            object.addProperty("test", parms.get("testClass"));
-            object.addProperty("method", parms.get("testMethod"));
+            object.addProperty("test", json.get("testClass").getAsString());
+            object.addProperty("method", json.get("testMethod").getAsString());
             object.add("classes", array);
             try {
                 writer.write(gson.toJson(object));

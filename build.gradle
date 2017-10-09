@@ -14,5 +14,5 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.2'
     compile 'com.ea.agentloader:ea-agent-loader:1.0.3'
     compile "org.nanohttpd:nanohttpd:2.2.0"
-    compile "org.apache.httpcomponents:httpclient:4.2.5"
+    compile "com.squareup.okhttp3:okhttp:3.9.0"
 }
