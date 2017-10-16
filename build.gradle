@@ -15,4 +15,6 @@ dependencies {
     compile 'com.ea.agentloader:ea-agent-loader:1.0.3'
     compile "org.nanohttpd:nanohttpd:2.2.0"
     compile "com.squareup.okhttp3:okhttp:3.9.0"
+    compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.8.0.201706111038-r'
+    compile group: 'org.javassist', name: 'javassist', version: '3.22.0-GA'
 }

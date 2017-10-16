@@ -4,13 +4,26 @@ import org.junit.runners.model.InitializationError;
 
 public class LoggerRunner extends BlockJUnit4ClassRunner {
 
+    private static JunitLoggerListener listener = null;
+
+    static {
+        try {
+            listener = new JunitLoggerListener();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public LoggerRunner(Class<?> klass) throws InitializationError {
         super(klass);
     }
 
     @Override
     public void run(RunNotifier notifier) {
-        notifier.addListener(new JunitLoggerListener());
+        if (listener != null) {
+            notifier.addListener(listener);
+            listener = null;
+        }
         notifier.fireTestRunStarted(getDescription());
         super.run(notifier);
     }

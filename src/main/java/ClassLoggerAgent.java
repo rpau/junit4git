@@ -1,12 +1,12 @@
 import com.google.gson.*;
 import fi.iki.elonen.NanoHTTPD;
+import resolvers.LocalTestsResolver;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.instrument.Instrumentation;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class ClassLoggerAgent extends NanoHTTPD {
 
@@ -16,14 +16,21 @@ public class ClassLoggerAgent extends NanoHTTPD {
 
     private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    private FileWriter writer;
+    private File report = new File("smart-testing-report.json");
 
     public ClassLoggerAgent(int port, LoggerClassTransformer transformer) throws IOException {
         super(port);
         this.transformer = transformer;
+        clearFile();
+    }
 
-        File report = new File("smart-testing-report.json");
-        writer = new FileWriter(report);
+    private void clearFile() {
+        try (FileWriter writer = new FileWriter(report)){
+            writer.write("");
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -39,18 +46,28 @@ public class ClassLoggerAgent extends NanoHTTPD {
         if ("start".equals(json.get("event").getAsString())) {
             transformer.createContext();
         } else {
+            JsonArray tests = new JsonArray();
+
+
+            if (report.exists()) {
+                try {
+                    tests = new JsonParser().parse(
+                            new InputStreamReader(new FileInputStream(report)))
+                            .getAsJsonArray();
+                } catch (Exception e) {}
+            }
 
             JsonObject object = new JsonObject();
             object.addProperty("test", json.get("testClass").getAsString());
             object.addProperty("method", json.get("testMethod").getAsString());
             object.add("classes", array);
-            try {
-                writer.write(gson.toJson(object));
+            tests.add(object);
+            try (FileWriter writer = new FileWriter(report)){
+                writer.write(gson.toJson(tests));
                 writer.flush();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
         return newFixedLengthResponse("");
     }
@@ -58,16 +75,12 @@ public class ClassLoggerAgent extends NanoHTTPD {
     @Override
     public void closeAllConnections() {
         super.closeAllConnections();
-        try {
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
-    public static void agentmain(String agentArgs, Instrumentation inst) throws IOException {
+    public static void agentmain(String agentArgs, Instrumentation inst) throws Exception {
         ClassLoggerAgent agent = new ClassLoggerAgent(9000, new LoggerClassTransformer());
         agent.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
         inst.addTransformer(agent.transformer);
+        new LocalTestsResolver().ignoreTests(inst);
     }
 }

@@ -4,16 +4,17 @@ import okhttp3.*;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunListener;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
 public class JunitLoggerListener extends RunListener {
 
-    OkHttpClient client = new OkHttpClient();
+    private OkHttpClient client = new OkHttpClient();
 
-    public JunitLoggerListener() {
-        AgentLoader.loadAgentClass(ClassLoggerAgent.class.getName(), "");
+    private static Boolean loaded = false;
+
+    public JunitLoggerListener() throws Exception {
+        if (!loaded) {
+            AgentLoader.loadAgentClass(ClassLoggerAgent.class.getName(), "");
+            loaded = true;
+        }
     }
 
     private void send(Description description, String event) {
@@ -32,7 +33,6 @@ public class JunitLoggerListener extends RunListener {
                     .build();
 
             client.newCall(request).execute();
-
 
         } catch (Exception e) {
             e.printStackTrace();
