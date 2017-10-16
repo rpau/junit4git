@@ -1,9 +1,9 @@
 package rpau.smartesting.core;
 
-import com.google.gson.JsonArray;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.CtConstructor;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -14,33 +14,40 @@ import java.util.Set;
 
 public class LoggerClassTransformer implements ClassFileTransformer {
 
-    private static Set<String> array  = new LinkedHashSet<>();
+    private static Set<String> referencedClasses = new LinkedHashSet<>();
 
     public static void createContext() {
-        array = new LinkedHashSet<>();
+        referencedClasses = new LinkedHashSet<>();
     }
 
     public static void add(String name) {
-        array.add(name);
+        referencedClasses.add(name);
+    }
+
+    protected boolean belongsToAJarFile(ProtectionDomain protectionDomain) {
+        return protectionDomain.getCodeSource().getLocation().getPath().endsWith(".jar");
     }
 
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                             ProtectionDomain protectionDomain, byte[] classfileBuffer)
             throws IllegalClassFormatException {
 
-        if (array != null && !protectionDomain.getCodeSource().getLocation().getPath().endsWith(".jar")) {
-            add(className);
-            return instrumentConstructors(className, classfileBuffer);
+        if (className != null && !belongsToAJarFile(protectionDomain)) {
+            return instrumentConstructors(normalizeName(className), classfileBuffer);
         }
 
         return classfileBuffer;
     }
 
-    private byte[] instrumentConstructors(String className, byte[] classfileBuffer) {
+    private String normalizeName(String className) {
+        return className.replaceAll("/", "\\.");
+    }
+
+    public byte[] instrumentConstructors(String className, byte[] classfileBuffer) {
         ClassPool pool = ClassPool.getDefault();
         try {
             CtClass clazz = pool.get(className);
-            Arrays.stream(clazz.getConstructors()).forEach(ctConstructor -> {
+            for(CtConstructor ctConstructor: clazz.getConstructors()) {
                 try {
                     ctConstructor.insertAfter(LoggerClassTransformer.class.getName()
                             + ".add(\"" + className +"\");");
@@ -48,16 +55,15 @@ public class LoggerClassTransformer implements ClassFileTransformer {
                 } catch (CannotCompileException e) {
                     e.printStackTrace();
                 }
-            });
+            }
             return clazz.toBytecode();
         } catch (Throwable e) {
+            e.printStackTrace();
         }
         return classfileBuffer;
     }
 
-    public static JsonArray destroyContext() {
-        JsonArray res = new JsonArray();
-        array.stream().forEach(value -> res.add(value));
-        return res;
+    public static Set<String> destroyContext() {
+        return referencedClasses;
     }
 }

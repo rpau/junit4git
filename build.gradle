@@ -17,4 +17,5 @@ dependencies {
     compile "com.squareup.okhttp3:okhttp:3.9.0"
     compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.8.0.201706111038-r'
     compile group: 'org.javassist', name: 'javassist', version: '3.22.0-GA'
+    testCompile group: 'commons-io', name: 'commons-io', version: '2.5'
 }

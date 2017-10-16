@@ -24,7 +24,7 @@ import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 import java.util.*;
 
-public abstract class TestsResolver {
+public abstract class AbstractIgnoredTestsResolver {
 
     protected Set<String> getTestsToIgnore(InputStream is) throws IOException, GitAPIException {
         JsonArray tests =  new JsonParser().parse(new InputStreamReader(is)).getAsJsonArray();
@@ -35,10 +35,14 @@ public abstract class TestsResolver {
         Iterator<String> it = status.iterator();
         boolean found = false;
         while(it.hasNext() && !found) {
-            String fileName = it.next();
-            found = fileName.endsWith(testClassName +".java");
+            String className = it.next();
+            found = className.endsWith(toFileName(testClassName));
         }
         return found;
+    }
+
+    private String toFileName(String name) {
+        return name.replaceAll("\\.", "/") +".java";
     }
 
     private Set<String> testsToIgnore(Set<String> status, JsonArray tests) {

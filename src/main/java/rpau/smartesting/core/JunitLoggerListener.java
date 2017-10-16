@@ -19,7 +19,7 @@ public class JunitLoggerListener extends RunListener {
         }
     }
 
-    private void send(Description description, String event) {
+    private void sendRequestToClassLoggerAgent(Description description, String event) {
         try {
 
             JsonObject object = new JsonObject();
@@ -43,11 +43,11 @@ public class JunitLoggerListener extends RunListener {
 
     @Override
     public void testStarted(Description description) {
-        send(description, "start");
+        sendRequestToClassLoggerAgent(description, "start");
     }
 
     @Override
     public void testFinished(Description description) {
-        send(description, "stop");
+        sendRequestToClassLoggerAgent(description, "stop");
     }
 }
