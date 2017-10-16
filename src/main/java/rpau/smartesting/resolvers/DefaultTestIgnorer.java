@@ -6,14 +6,14 @@ import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
 
-public class DefaultIgnoredTestsResolver extends AbstractIgnoredTestsResolver {
+public class DefaultTestIgnorer extends AbstractTestIgnorer {
 
     private File report = new File("smart-testing-report.base.json");
 
-    public DefaultIgnoredTestsResolver() {
+    public DefaultTestIgnorer() {
     }
 
-    public DefaultIgnoredTestsResolver(File report) {
+    public DefaultTestIgnorer(File report) {
         this.report = report;
     }
 

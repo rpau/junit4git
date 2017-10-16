@@ -24,7 +24,7 @@ import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 import java.util.*;
 
-public abstract class AbstractIgnoredTestsResolver {
+public abstract class AbstractTestIgnorer {
 
     protected Set<String> getTestsToIgnore(InputStream is) throws IOException, GitAPIException {
         JsonArray tests =  new JsonParser().parse(new InputStreamReader(is)).getAsJsonArray();

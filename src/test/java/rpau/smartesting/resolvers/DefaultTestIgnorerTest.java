@@ -12,11 +12,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class DefaultIgnoredTestsResolverTest {
+public class DefaultTestIgnorerTest {
 
     @Test
     public void whenThereAreNoTestsThenNothingIsIgnored() throws Exception {
-        DefaultIgnoredTestsResolver resolver = new DefaultIgnoredTestsResolver(){
+        DefaultTestIgnorer resolver = new DefaultTestIgnorer(){
             @Override
             protected Set<String> runGitStatus() throws IOException, GitAPIException {
                 return Collections.EMPTY_SET;
@@ -28,7 +28,7 @@ public class DefaultIgnoredTestsResolverTest {
 
     @Test
     public void whenThereIsATestWhichIsNotModifiedThenIsIgnored() throws Exception {
-        DefaultIgnoredTestsResolver resolver = new DefaultIgnoredTestsResolver(){
+        DefaultTestIgnorer resolver = new DefaultTestIgnorer(){
             @Override
             protected Set<String> runGitStatus() throws IOException, GitAPIException {
                 return Collections.EMPTY_SET;
@@ -48,7 +48,7 @@ public class DefaultIgnoredTestsResolverTest {
 
     @Test
     public void whenThereIsATestWhichIsModifiedThenIsNotIgnored() throws Exception {
-        DefaultIgnoredTestsResolver resolver = new DefaultIgnoredTestsResolver(){
+        DefaultTestIgnorer resolver = new DefaultTestIgnorer(){
             @Override
             protected Set<String> runGitStatus() throws IOException, GitAPIException {
                 return new HashSet<>(Arrays.asList("MyTest.java"));
@@ -68,7 +68,7 @@ public class DefaultIgnoredTestsResolverTest {
 
     @Test
     public void whenThereIsARefClassWhichIsModifiedThenIsNotIgnored() throws Exception {
-        DefaultIgnoredTestsResolver resolver = new DefaultIgnoredTestsResolver(){
+        DefaultTestIgnorer resolver = new DefaultTestIgnorer(){
             @Override
             protected Set<String> runGitStatus() throws IOException, GitAPIException {
                 return new HashSet<>(Arrays.asList("rpau/smartesting/samples/Hello.java"));
