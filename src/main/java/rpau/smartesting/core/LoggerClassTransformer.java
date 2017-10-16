@@ -1,3 +1,5 @@
+package rpau.smartesting.core;
+
 import com.google.gson.JsonArray;
 import javassist.CannotCompileException;
 import javassist.ClassPool;

@@ -1,4 +1,4 @@
-package resolvers;
+package rpau.smartesting.resolvers;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 

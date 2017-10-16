@@ -1,3 +1,5 @@
+package rpau.smartesting.core;
+
 import com.ea.agentloader.AgentLoader;
 import com.google.gson.JsonObject;
 import okhttp3.*;

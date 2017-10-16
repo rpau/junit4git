@@ -1,12 +1,13 @@
+package rpau.smartesting.core;
+
 import com.google.gson.*;
 import fi.iki.elonen.NanoHTTPD;
-import resolvers.LocalTestsResolver;
+import rpau.smartesting.resolvers.LocalTestsResolver;
 
 import java.io.*;
 import java.lang.instrument.Instrumentation;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class ClassLoggerAgent extends NanoHTTPD {
 

@@ -1,4 +1,4 @@
-package resolvers;
+package rpau.smartesting.resolvers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -118,7 +118,7 @@ public abstract class TestsResolver {
                     e.printStackTrace();
                 }
             });
-            
+
             inst.redefineClasses(new ClassDefinition(Class.forName(className), clazz.toBytecode()));
 
         }
