@@ -15,20 +15,33 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Ignore;
+import rpau.smartesting.core.AbstractReportUpdater;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 import java.util.*;
+import java.util.stream.Collectors;
 
-public abstract class AbstractTestIgnorer {
+public class TestIgnorer {
+
+    private final AbstractReportUpdater updater;
+
+    public TestIgnorer(AbstractReportUpdater updater) {
+        this.updater = updater;
+    }
 
     protected Set<String> getTestsToIgnore(InputStream is) throws IOException, GitAPIException {
-        JsonArray tests =  new JsonParser().parse(new InputStreamReader(is)).getAsJsonArray();
-        return testsToIgnore(runGitStatus(), tests);
+        String result = new BufferedReader(new InputStreamReader(is))
+                .lines().collect(Collectors.joining("\n"));
+
+        JsonElement element = new JsonParser().parse(result);
+        if (element.isJsonArray()) {
+            JsonArray tests = element.getAsJsonArray();
+            return testsToIgnore(runGitStatus(), tests);
+        } else {
+            return new HashSet<>();
+        }
     }
 
     private boolean isModified(String testClassName, Set<String> status) {
@@ -128,5 +141,7 @@ public abstract class AbstractTestIgnorer {
         }
     }
 
-    public abstract Set<String> getTestsToIgnore() throws Exception;
+    public  Set<String> getTestsToIgnore() throws Exception {
+        return getTestsToIgnore(updater.getBaseReport());
+    }
 }

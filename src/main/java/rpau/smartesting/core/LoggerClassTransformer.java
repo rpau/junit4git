@@ -47,6 +47,7 @@ public class LoggerClassTransformer implements ClassFileTransformer {
         ClassPool pool = ClassPool.getDefault();
         try {
             CtClass clazz = pool.get(className);
+            clazz.defrost();
             for(CtConstructor ctConstructor: clazz.getConstructors()) {
                 try {
                     ctConstructor.insertAfter(LoggerClassTransformer.class.getName()
@@ -56,6 +57,7 @@ public class LoggerClassTransformer implements ClassFileTransformer {
                     e.printStackTrace();
                 }
             }
+            clazz.defrost();
             return clazz.toBytecode();
         } catch (Throwable e) {
             e.printStackTrace();

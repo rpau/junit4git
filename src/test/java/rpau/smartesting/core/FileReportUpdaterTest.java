@@ -13,14 +13,14 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class ReportUpdaterTest {
+public class FileReportUpdaterTest {
 
     @Test
     public void whenTheReportIsEmptyThenItWritesTheTest() {
 
         final StringWriter writer = new StringWriter();
 
-        ReportUpdater updaterOnEmptyReport = new ReportUpdater() {
+        FileReportUpdater updaterOnEmptyReport = new FileReportUpdater() {
 
             @Override
             protected Writer buildWriter() throws IOException {
@@ -58,7 +58,7 @@ public class ReportUpdaterTest {
 
         final StringWriter writer = new StringWriter();
 
-        ReportUpdater updaterWithNonEmptyReport = new ReportUpdater() {
+        FileReportUpdater updaterWithNonEmptyReport = new FileReportUpdater() {
 
             @Override
             protected Writer buildWriter() throws IOException {

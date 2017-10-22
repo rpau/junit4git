@@ -6,12 +6,11 @@ import com.google.gson.*;
 import java.io.*;
 import java.util.Set;
 
-public class ReportUpdater {
+public abstract class AbstractReportUpdater {
 
-    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    private File report = new File("smart-testing-report.json");
+    protected Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    public void clearFile() {
+    public void removeContents() {
         try (Writer writer = buildWriter()){
             writer.write("");
             writer.flush();
@@ -20,19 +19,25 @@ public class ReportUpdater {
         }
     }
 
-    protected Writer buildWriter() throws IOException {
-        return new FileWriter(report);
-    }
+    public abstract InputStream getBaseReport() throws IOException;
+
+    protected abstract Reader buildReader() throws IOException;
+
+    protected abstract Writer buildWriter() throws IOException;
+
+    protected abstract boolean isReportCreated() throws IOException;
 
     protected JsonArray readReport() {
         JsonArray tests = new JsonArray();
-        if (report.exists()) {
-            try {
-                tests = new JsonParser().parse(
-                        new InputStreamReader(new FileInputStream(report)))
-                        .getAsJsonArray();
-            } catch (Exception e) {}
-        }
+        try {
+            if (isReportCreated()) {
+                JsonElement element = new JsonParser().parse(buildReader());
+                if (element.isJsonArray()) {
+                    tests = element.getAsJsonArray();
+                }
+
+            }
+        } catch (Exception e) {}
         return tests;
     }
 

@@ -2,7 +2,7 @@ package rpau.smartesting.core;
 
 import com.google.gson.*;
 import fi.iki.elonen.NanoHTTPD;
-import rpau.smartesting.resolvers.DefaultTestIgnorer;
+import rpau.smartesting.resolvers.TestIgnorer;
 
 import java.io.*;
 import java.lang.instrument.Instrumentation;
@@ -13,12 +13,12 @@ public class ClassLoggerAgent extends NanoHTTPD {
 
     private final Map<String, String> input = new HashMap<>();
 
-    private final ReportUpdater service;
+    private final AbstractReportUpdater service;
 
     public ClassLoggerAgent(int port) throws IOException {
         super(port);
-        service = new ReportUpdater();
-        service.clearFile();
+        service = new GitNotesReportUpdater();
+        service.removeContents();
     }
 
     @Override
@@ -38,6 +38,6 @@ public class ClassLoggerAgent extends NanoHTTPD {
         ClassLoggerAgent agent = new ClassLoggerAgent(9000);
         agent.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
         inst.addTransformer(new LoggerClassTransformer());
-        new DefaultTestIgnorer().ignoreTests(inst);
+        new TestIgnorer(agent.service).ignoreTests(inst);
     }
 }
