@@ -4,7 +4,9 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import rpau.smartesting.core.reports.FileReportUpdater;
+import rpau.smartesting.junit4.SmartTestRunner;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +16,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+@RunWith(SmartTestRunner.class)
 public class TestIgnorerTest {
 
     @Test

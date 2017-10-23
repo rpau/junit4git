@@ -5,7 +5,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import rpau.smartesting.core.reports.FileReportUpdater;
+import rpau.smartesting.junit4.SmartTestRunner;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -14,6 +16,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+@RunWith(SmartTestRunner.class)
 public class FileReportUpdaterTest {
 
     @Test

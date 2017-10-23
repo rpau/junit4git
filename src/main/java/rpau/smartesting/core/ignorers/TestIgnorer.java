@@ -84,9 +84,9 @@ public class TestIgnorer {
         Set<String> changed = new LinkedHashSet<>();
         Git git = Git.open(new File(".").getCanonicalFile());
         try {
-
             Status status = git.status().call();
             changed.addAll(status.getModified());
+            changed.addAll(status.getChanged());
         } finally {
             git.close();
         }
@@ -132,7 +132,7 @@ public class TestIgnorer {
                     attr.addAnnotation(new Annotation(Ignore.class.getName(), constpool));
                     method.getMethodInfo().addAttribute(attr);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                   throw new RuntimeException("Error adding @Ignore annotations ", e);
                 }
             });
 

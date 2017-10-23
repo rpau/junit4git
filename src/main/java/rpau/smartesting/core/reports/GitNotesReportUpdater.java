@@ -2,6 +2,7 @@ package rpau.smartesting.core.reports;
 
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.RefUpdate;
@@ -11,33 +12,40 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.util.StringUtils;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public class GitNotesReportUpdater extends AbstractReportUpdater {
 
+    private static String BASE_BRANCH = "master";
+
+    private static String GIT_NOTES_REF = "refs/notes/tests";
 
     public void removeContents() {
         try {
             Git git = open();
-            Ref ref = git.getRepository().findRef(getRef());
+            Ref ref = git.getRepository().findRef(GIT_NOTES_REF);
             if (ref == null) {
-                RefUpdate ru = git.getRepository().getRefDatabase().newUpdate(getRef(), true);
-                ru.setNewObjectId(getHead(git).getObjectId());
-                ru.update();
-                try {
-                    RevWalk walk = new RevWalk(git.getRepository());
-                    RevCommit commit = walk.parseCommit(getHead(git).getObjectId());
-                    git.notesRemove().setNotesRef(getRef())
-                            .setObjectId(commit).call();
-                } catch (GitAPIException e) {
-                    e.printStackTrace();
-                } finally {
-                    git.close();
+                createGitNotesRef(git);
+                if (isInMasterAndClean(git)) {
+                    removeLastNote(git);
                 }
             }
-
         } catch (Exception e) {
-
+            throw new RuntimeException("Error removing the existing Git notes in " + GIT_NOTES_REF, e);
         }
+    }
+
+    private void removeLastNote(Git git) throws IOException, GitAPIException {
+        RevWalk walk = new RevWalk(git.getRepository());
+        RevCommit commit = walk.parseCommit(getHead(git).getObjectId());
+        git.notesRemove().setNotesRef(GIT_NOTES_REF)
+                .setObjectId(commit).call();
+    }
+
+    private void createGitNotesRef(Git git) throws IOException {
+        RefUpdate ru = git.getRepository().getRefDatabase().newUpdate(GIT_NOTES_REF, true);
+        ru.setNewObjectId(getHead(git).getObjectId());
+        ru.update();
     }
 
     @Override
@@ -46,15 +54,11 @@ public class GitNotesReportUpdater extends AbstractReportUpdater {
     }
 
     private Ref getHead(Git git) throws IOException {
-        return git.getRepository().findRef("refs/heads/master");
+        return git.getRepository().findRef("refs/heads/" + BASE_BRANCH);
     }
 
     private  Git open() throws IOException  {
         return Git.open(new File(".").getCanonicalFile());
-    }
-
-    private  String getRef() {
-        return "refs/notes/tests";
     }
 
     @Override
@@ -68,18 +72,18 @@ public class GitNotesReportUpdater extends AbstractReportUpdater {
         try {
             RevWalk walk = new RevWalk(git.getRepository());
             RevCommit commit = walk.parseCommit(getHead(git).getObjectId());
-            Note note = git.notesShow().setNotesRef(getRef())
+            Note note = git.notesShow().setNotesRef(GIT_NOTES_REF)
                     .setObjectId(commit).call();
 
             if (note != null) {
                 return new String(git.getRepository().open(note.getData()).getCachedBytes(),
-                        "UTF-8");
+                        StandardCharsets.UTF_8);
             } else {
                 return "";
             }
 
         } catch(GitAPIException e) {
-            throw new IOException("Error reading notes", e);
+            throw new IOException("Error reading Git notes", e);
         } finally {
             git.close();
         }
@@ -89,20 +93,29 @@ public class GitNotesReportUpdater extends AbstractReportUpdater {
     protected Writer buildWriter() throws IOException {
         Git git = open();
         try {
-            if (git.getRepository().getBranch().equals("master")) {
-                if (git.status().call().isClean()) {
-                    return new GitNotesWriter(this);
-                } else {
-                    return new StringWriter();
-                }
+            if (isInMasterAndClean(git)) {
+                return new GitNotesWriter(this);
             } else {
                 return new StringWriter();
             }
         } catch (GitAPIException e) {
-            throw new IOException("Error writing Git notes", e);
+            throw new IOException("Error building the git notes writer", e);
         } finally {
             git.close();
         }
+    }
+
+    private boolean isInMasterAndClean(Git git) throws GitAPIException, IOException {
+        if (git.getRepository().getBranch().equals(BASE_BRANCH)) {
+            Status status = git.status().call();
+            if (status.getChanged().isEmpty() && status.getModified().isEmpty()) {
+                return !(status.getAdded().stream()
+                        .filter(file -> file.endsWith(".java"))
+                        .findFirst()
+                        .isPresent());
+            }
+        }
+        return false;
     }
 
     private static class GitNotesWriter extends StringWriter {
@@ -120,7 +133,7 @@ public class GitNotesReportUpdater extends AbstractReportUpdater {
                 try {
                     RevWalk walk = new RevWalk(git.getRepository());
                     RevCommit commit = walk.parseCommit(updater.getHead(git).getObjectId());
-                    git.notesAdd().setNotesRef(updater.getRef())
+                    git.notesAdd().setNotesRef(GIT_NOTES_REF)
                             .setObjectId(commit)
                             .setMessage(str).call();
                 } catch (GitAPIException e) {
@@ -128,7 +141,9 @@ public class GitNotesReportUpdater extends AbstractReportUpdater {
                 } finally {
                     git.close();
                 }
-            } catch (Exception e){}
+            } catch (Exception e){
+                throw new RuntimeException("Error from the GitNotesWriter", e);
+            }
         }
     }
 
