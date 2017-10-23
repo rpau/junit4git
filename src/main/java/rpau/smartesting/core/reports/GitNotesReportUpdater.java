@@ -1,4 +1,4 @@
-package rpau.smartesting.core;
+package rpau.smartesting.core.reports;
 
 
 import org.eclipse.jgit.api.Git;

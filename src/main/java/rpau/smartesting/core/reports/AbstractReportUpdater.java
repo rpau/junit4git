@@ -1,7 +1,8 @@
-package rpau.smartesting.core;
+package rpau.smartesting.core.reports;
 
 
 import com.google.gson.*;
+import rpau.smartesting.core.AgentClassTransformer;
 
 import java.io.*;
 import java.util.Set;
@@ -66,7 +67,7 @@ public abstract class AbstractReportUpdater {
     }
 
     protected Set<String> getReferencedClasses() {
-        return LoggerClassTransformer.destroyContext();
+        return AgentClassTransformer.destroyContext();
     }
 
     protected void onEnd(String event, String testClass, String testMethod, Set<String> referencedClasses) {
@@ -75,7 +76,7 @@ public abstract class AbstractReportUpdater {
     }
 
     protected void onStart(String event, String testClass, String testMethod) {
-        LoggerClassTransformer.createContext();
+        AgentClassTransformer.createContext();
     }
 
     public void update(String event, String testClass, String testMethod){

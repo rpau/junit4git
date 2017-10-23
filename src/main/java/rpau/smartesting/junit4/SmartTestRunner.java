@@ -1,22 +1,22 @@
-package rpau.smartesting.core;
+package rpau.smartesting.junit4;
 
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;
 
-public class LoggerRunner extends BlockJUnit4ClassRunner {
+public class SmartTestRunner extends BlockJUnit4ClassRunner {
 
-    private static JunitLoggerListener listener = null;
+    private static SmartTestListener listener = null;
 
     static {
         try {
-            listener = new JunitLoggerListener();
+            listener = new SmartTestListener();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public LoggerRunner(Class<?> klass) throws InitializationError {
+    public SmartTestRunner(Class<?> klass) throws InitializationError {
         super(klass);
     }
 

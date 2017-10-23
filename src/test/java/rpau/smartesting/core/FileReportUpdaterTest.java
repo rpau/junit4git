@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.junit.Assert;
 import org.junit.Test;
+import rpau.smartesting.core.reports.FileReportUpdater;
 
 import java.io.IOException;
 import java.io.StringWriter;

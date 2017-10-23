@@ -1,31 +1,33 @@
 package rpau.smartesting.core;
 
+
 import com.ea.agentloader.AgentLoader;
 import com.google.gson.JsonObject;
-import okhttp3.*;
-import org.junit.runner.Description;
-import org.junit.runner.notification.RunListener;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
-public class JunitLoggerListener extends RunListener {
+public class AgentClient {
 
     private OkHttpClient client = new OkHttpClient();
 
     private static Boolean loaded = false;
 
-    public JunitLoggerListener() throws Exception {
+    public AgentClient() {
         if (!loaded) {
-            AgentLoader.loadAgentClass(ClassLoggerAgent.class.getName(), "");
+            AgentLoader.loadAgentClass(AgentServer.class.getName(), "");
             loaded = true;
         }
     }
 
-    private void sendRequestToClassLoggerAgent(Description description, String event) {
+    public void sendRequestToClassLoggerAgent(String className, String methodName, String event) {
         try {
 
             JsonObject object = new JsonObject();
             object.addProperty("event", event);
-            object.addProperty("testClass", description.getClassName());
-            object.addProperty("testMethod", description.getMethodName());
+            object.addProperty("testClass", className);
+            object.addProperty("testMethod", methodName);
 
             RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), object.toString());
 
@@ -39,15 +41,5 @@ public class JunitLoggerListener extends RunListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void testStarted(Description description) {
-        sendRequestToClassLoggerAgent(description, "start");
-    }
-
-    @Override
-    public void testFinished(Description description) {
-        sendRequestToClassLoggerAgent(description, "stop");
     }
 }

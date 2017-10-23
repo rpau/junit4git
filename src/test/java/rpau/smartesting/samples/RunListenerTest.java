@@ -2,10 +2,10 @@ package rpau.smartesting.samples;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import rpau.smartesting.core.LoggerRunner;
+import rpau.smartesting.junit4.SmartTestRunner;
 
 
-@RunWith(LoggerRunner.class)
+@RunWith(SmartTestRunner.class)
 public class RunListenerTest {
 
     @Test

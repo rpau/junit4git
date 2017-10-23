@@ -8,11 +8,10 @@ import javassist.CtConstructor;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class LoggerClassTransformer implements ClassFileTransformer {
+public class AgentClassTransformer implements ClassFileTransformer {
 
     private static Set<String> referencedClasses = new LinkedHashSet<>();
 
@@ -50,7 +49,7 @@ public class LoggerClassTransformer implements ClassFileTransformer {
             clazz.defrost();
             for(CtConstructor ctConstructor: clazz.getConstructors()) {
                 try {
-                    ctConstructor.insertAfter(LoggerClassTransformer.class.getName()
+                    ctConstructor.insertAfter(AgentClassTransformer.class.getName()
                             + ".add(\"" + className +"\");");
 
                 } catch (CannotCompileException e) {

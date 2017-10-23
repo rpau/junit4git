@@ -1,10 +1,10 @@
-package rpau.smartesting.resolvers;
+package rpau.smartesting.core.ignorers;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Assert;
 import org.junit.Test;
-import rpau.smartesting.core.FileReportUpdater;
+import rpau.smartesting.core.reports.FileReportUpdater;
 
 import java.io.IOException;
 import java.io.InputStream;

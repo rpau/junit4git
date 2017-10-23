@@ -1,4 +1,4 @@
-package rpau.smartesting.resolvers;
+package rpau.smartesting.core.ignorers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -15,7 +15,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Ignore;
-import rpau.smartesting.core.AbstractReportUpdater;
+import rpau.smartesting.core.reports.AbstractReportUpdater;
 
 import java.io.*;
 import java.lang.instrument.ClassDefinition;

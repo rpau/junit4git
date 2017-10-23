@@ -6,13 +6,13 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 
-public class LoggerClassTransformerTest {
+public class AgentClassTransformerTest {
 
     private static class TransformingClassLoader extends ClassLoader {
 
         private final String className;
 
-        final LoggerClassTransformer transformer = new LoggerClassTransformer();
+        final AgentClassTransformer transformer = new AgentClassTransformer();
 
         public TransformingClassLoader(String className) {
             super();
@@ -31,11 +31,11 @@ public class LoggerClassTransformerTest {
 
     @Test
     public void whenAClassIsLoadedThenConstructorsBecomeInstrumented() throws Exception {
-        LoggerClassTransformer.destroyContext();
+        AgentClassTransformer.destroyContext();
         ClassLoader classLoader = new TransformingClassLoader("Dummy");
         Class<?> clazz = classLoader.loadClass(Dummy.class.getName());
         clazz.newInstance();
         Assert.assertEquals(new LinkedHashSet<String>(Arrays.asList(Dummy.class.getName())),
-                LoggerClassTransformer.destroyContext());
+                AgentClassTransformer.destroyContext());
     }
 }
