@@ -1,4 +1,4 @@
-group 'com.github'
+group 'rpau.smartesting'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
