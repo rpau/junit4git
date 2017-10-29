@@ -1,11 +1,11 @@
-package rpau.smartesting.samples;
+package org.junit4git.samples;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import rpau.smartesting.junit4.SmartTestRunner;
+import org.junit4git.junit4.Junit4GitRunner;
 
 
-@RunWith(SmartTestRunner.class)
+@RunWith(Junit4GitRunner.class)
 public class RunListenerTest {
 
     @Test

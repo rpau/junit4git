@@ -1,5 +1,5 @@
-group 'rpau.smartesting'
-version '1.0-SNAPSHOT'
+group 'org.junit4git'
+version '1.0'
 
 buildscript {
     repositories {

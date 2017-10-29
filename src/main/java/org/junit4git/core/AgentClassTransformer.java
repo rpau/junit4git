@@ -1,4 +1,4 @@
-package rpau.smartesting.core;
+package org.junit4git.core;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;

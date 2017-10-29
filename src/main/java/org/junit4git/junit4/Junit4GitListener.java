@@ -1,10 +1,10 @@
-package rpau.smartesting.junit4;
+package org.junit4git.junit4;
 
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunListener;
-import rpau.smartesting.core.AgentClient;
+import org.junit4git.core.AgentClient;
 
-public class SmartTestListener extends RunListener {
+public class Junit4GitListener extends RunListener {
 
     private AgentClient client = new AgentClient();
 

@@ -1,12 +1,12 @@
-package rpau.smartesting.core.ignorers;
+package org.junit4git.core.ignorers;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import rpau.smartesting.core.reports.FileReportUpdater;
-import rpau.smartesting.junit4.SmartTestRunner;
+import org.junit4git.core.reports.FileReportUpdater;
+import org.junit4git.junit4.Junit4GitRunner;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-@RunWith(SmartTestRunner.class)
+@RunWith(Junit4GitRunner.class)
 public class TestIgnorerTest {
 
     @Test
@@ -41,7 +41,7 @@ public class TestIgnorerTest {
                                 "  \"test\": \"MyTest\",\n" +
                                 "  \"method\": \"testMethod\",\n" +
                                 "  \"classes\": [\n" +
-                                "    \"rpau.smartesting.samples.Hello\"\n" +
+                                "    \"Hello\"\n" +
                                 "  ]\n" +
                                 "}]", Charset.forName("UTF-8"));
             }
@@ -71,7 +71,7 @@ public class TestIgnorerTest {
                         "  \"test\": \"MyTest\",\n" +
                         "  \"method\": \"testMethod\",\n" +
                         "  \"classes\": [\n" +
-                        "    \"rpau.smartesting.samples.Hello\"\n" +
+                        "    \"Hello\"\n" +
                         "  ]\n" +
                         "}]", Charset.forName("UTF-8")));
 
@@ -83,7 +83,7 @@ public class TestIgnorerTest {
         TestIgnorer resolver = new TestIgnorer(new FileReportUpdater()){
             @Override
             protected Set<String> runGitStatus() throws IOException, GitAPIException {
-                return new HashSet<>(Arrays.asList("rpau/smartesting/samples/Hello.java"));
+                return new HashSet<>(Arrays.asList("org/junit4git/samples/Hello.java"));
             }
         };
         Set<String> result = resolver.getTestsToIgnore(IOUtils.toInputStream(
@@ -91,7 +91,7 @@ public class TestIgnorerTest {
                         "  \"test\": \"MyTest\",\n" +
                         "  \"method\": \"testMethod\",\n" +
                         "  \"classes\": [\n" +
-                        "    \"rpau.smartesting.samples.Hello\"\n" +
+                        "    \"Hello\"\n" +
                         "  ]\n" +
                         "}]", Charset.forName("UTF-8")));
 

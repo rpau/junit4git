@@ -1,10 +1,10 @@
-package rpau.smartesting.core;
+package org.junit4git.core;
 
 import com.google.gson.*;
 import fi.iki.elonen.NanoHTTPD;
-import rpau.smartesting.core.ignorers.TestIgnorer;
-import rpau.smartesting.core.reports.AbstractReportUpdater;
-import rpau.smartesting.core.reports.GitNotesReportUpdater;
+import org.junit4git.core.reports.AbstractReportUpdater;
+import org.junit4git.core.reports.GitNotesReportUpdater;
+import org.junit4git.core.ignorers.TestIgnorer;
 
 import java.io.*;
 import java.lang.instrument.Instrumentation;

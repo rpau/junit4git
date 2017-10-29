@@ -1,8 +1,8 @@
-package rpau.smartesting.core.reports;
+package org.junit4git.core.reports;
 
 
 import com.google.gson.*;
-import rpau.smartesting.core.AgentClassTransformer;
+import org.junit4git.core.AgentClassTransformer;
 
 import java.io.*;
 import java.util.Set;
@@ -81,7 +81,6 @@ public abstract class AbstractReportUpdater {
 
     public void update(String event, String testClass, String testMethod){
         Set<String> referencedClasses = getReferencedClasses();
-        System.out.println("event "+event+" testC "+testClass + "testM "+testMethod);
         if ("start".equals(event)) {
             onStart(event, testClass, testMethod);
         } else {

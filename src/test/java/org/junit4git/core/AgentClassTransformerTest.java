@@ -1,9 +1,7 @@
-package rpau.smartesting.core;
+package org.junit4git.core;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import rpau.smartesting.junit4.SmartTestRunner;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;

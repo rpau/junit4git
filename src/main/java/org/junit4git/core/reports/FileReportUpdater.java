@@ -1,4 +1,4 @@
-package rpau.smartesting.core.reports;
+package org.junit4git.core.reports;
 
 
 

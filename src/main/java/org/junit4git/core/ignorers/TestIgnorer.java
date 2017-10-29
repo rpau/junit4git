@@ -1,4 +1,4 @@
-package rpau.smartesting.core.ignorers;
+package org.junit4git.core.ignorers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -15,7 +15,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Ignore;
-import rpau.smartesting.core.reports.AbstractReportUpdater;
+import org.junit4git.core.reports.AbstractReportUpdater;
 
 import java.io.*;
 import java.lang.instrument.ClassDefinition;
@@ -49,13 +49,13 @@ public class TestIgnorer {
         boolean found = false;
         while(it.hasNext() && !found) {
             String className = it.next();
-            found = className.endsWith(toFileName(testClassName));
+            found = className.contains(toFileName(testClassName));
         }
         return found;
     }
 
     private String toFileName(String name) {
-        return name.replaceAll("\\.", "/") +".java";
+        return name.replaceAll("\\.", "/");
     }
 
     private Set<String> testsToIgnore(Set<String> status, JsonArray tests) {

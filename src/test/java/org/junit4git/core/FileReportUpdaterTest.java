@@ -1,4 +1,4 @@
-package rpau.smartesting.core;
+package org.junit4git.core;
 
 
 import com.google.gson.JsonArray;
@@ -6,8 +6,8 @@ import com.google.gson.JsonObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import rpau.smartesting.core.reports.FileReportUpdater;
-import rpau.smartesting.junit4.SmartTestRunner;
+import org.junit4git.core.reports.FileReportUpdater;
+import org.junit4git.junit4.Junit4GitRunner;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-@RunWith(SmartTestRunner.class)
+@RunWith(Junit4GitRunner.class)
 public class FileReportUpdaterTest {
 
     @Test
@@ -33,7 +33,7 @@ public class FileReportUpdaterTest {
 
             @Override
             protected Set<String> getReferencedClasses() {
-                return new LinkedHashSet<>(Arrays.asList("rpau.smartesting.samples.Hello"));
+                return new LinkedHashSet<>(Arrays.asList("Hello"));
             }
 
             @Override
@@ -51,7 +51,7 @@ public class FileReportUpdaterTest {
                 "    \"test\": \"MyClass\",\n" +
                 "    \"method\": \"mytest\",\n" +
                 "    \"classes\": [\n" +
-                "      \"rpau.smartesting.samples.Hello\"\n" +
+                "      \"Hello\"\n" +
                 "    ]\n" +
                 "  }\n" +
                 "]", updated);
@@ -71,7 +71,7 @@ public class FileReportUpdaterTest {
 
             @Override
             protected Set<String> getReferencedClasses() {
-                return new LinkedHashSet<>(Arrays.asList("rpau.smartesting.samples.Hello"));
+                return new LinkedHashSet<>(Arrays.asList("Hello"));
             }
 
             @Override
@@ -100,7 +100,7 @@ public class FileReportUpdaterTest {
                 "    \"test\": \"MyClass\",\n" +
                 "    \"method\": \"mytest\",\n" +
                 "    \"classes\": [\n" +
-                "      \"rpau.smartesting.samples.Hello\"\n" +
+                "      \"Hello\"\n" +
                 "    ]\n" +
                 "  }\n" +
                 "]", updated);
