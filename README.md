@@ -1,5 +1,5 @@
-junit4git: Junit Extensions for an Incremental Test Execution
-============================================================
+junit4git: Skipping Unnecessary Junit Tests
+==========================================================
 
 This is a JUnit extension that resolves which, at runtime,
 skip those tests that are not related with your last changes in your
@@ -8,9 +8,14 @@ Git repository.
 You can use it from Maven and Gradle projects in any Junit based
 project (written in any JVM based language: e.g Kotlin, Java, Scala)
 
-## 1. Setup in a Maven Project
+## Requirements
 
-1. Declare a new test dependency in your pom.xml:
+- JRE 8
+- Git
+
+## Setup your Maven Build
+
+Declare a new test dependency in your pom.xml:
 ```
   <dependency>
     <groupId>org.junit4git</groupId>
@@ -19,7 +24,7 @@ project (written in any JVM based language: e.g Kotlin, Java, Scala)
     <scope>test</scope>
   </dependency>
 ```
-2. Add the following junit listener into your Maven tests executor:
+Add the following junit listener into your Maven tests executor:
 
  ```
  <plugin>
@@ -30,23 +35,23 @@ project (written in any JVM based language: e.g Kotlin, Java, Scala)
        <properties>
          <property>
            <name>listener</name>
-           <value>org.junit4git.junit4.SmartTestListener</value>
+           <value>org.junit4git.junit4.Junit4GitListener</value>
          </property>
        </properties>
      </configuration>
    </plugin>
  ```
 
-3. Commit these changes into your master` branch.
+Commit these changes into your master` branch.
 
 ```
 git checkout master
 git add pom.xml
 git commit -m 'junit4git setup'
 ```
-## 2. Generate a Base Testing Report
+## Generate a Base Testing Report
 
-Run your `master` branch tests. 
+After having configured your build, run your `master` branch tests. 
 
 ```
 mvn test
@@ -65,9 +70,9 @@ export GIT_NOTES_REF=refs/notes/tests
 git notes show
 ```
 
-## 3. Run Tests Incrementally
+## Run Tests Incrementally
 
-5. Run the tests again (from the master branch or in a new local branch)
+After generating your base testing report, run the tests again (from the master branch or in a new local branch)
 
 ```
 mvn tests
