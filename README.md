@@ -5,7 +5,11 @@
 
 This is a JUnit extension that resolves which, at runtime,
 skips those tests that are not related with your last changes in your
-Git repository.
+Git repository. This is not a new idea, since big companies, specially
+with big mono-repos have worked on it.
+
+[Martin Fowler](https://martinfowler.com/articles/rise-test-impact-analysis.html)
+also describes how to use the test impact to infer the minimum tests to run.
 
 You can use it from Maven and Gradle projects in any Junit based
 project (written in any JVM based language: e.g Kotlin, Java, Scala)
