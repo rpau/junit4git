@@ -70,10 +70,10 @@ publishing {
                     resolveStrategy = Closure.DELEGATE_FIRST
                     name 'smart-testing'
                     description 'A test library for incremental Junit tests execution'
-                    url 'https://github.com/rpau/smart-testing'
+                    url 'https://github.com/rpau/junit4git'
                     scm {
                         url 'https://github.com/rpau/smart-testing'
-                        connection 'https://github.com/rpau/smart-testing.git'
+                        connection 'https://github.com/rpau/junit4git.git'
                     }
                     licenses {
                         license {
