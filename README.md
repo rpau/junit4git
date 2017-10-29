@@ -112,3 +112,16 @@ new test files or modify an existing source file, only the affected tests are ex
 ## License
 
 This project is licensed under The Apache Software License.
+
+## Build
+
+This is a Gradle project that you can easily build running
+```bash
+gradle build
+```
+
+Or, if you want to generate a version to test it from a Maven project
+
+```bash
+gradle publishToMavenLocal
+```
