@@ -1,5 +1,5 @@
-junit4git
-=========
+![Logo](logo.png?raw=true&v=4&s=200)
+
 [![Build Status](https://travis-ci.org/rpau/smart-testing.svg?branch=master)](https://travis-ci.org/rpau/smart-testing)
 [![codecov](https://codecov.io/gh/rpau/smart-testing/branch/master/graph/badge.svg)](https://codecov.io/gh/rpau/smart-testing)
 
