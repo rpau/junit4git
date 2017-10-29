@@ -47,7 +47,7 @@ Add the following junit listener into your Maven tests executor:
   </plugin>
  ```
 
-Commit these changes into your master` branch.
+Commit these changes into your `master` branch (but you do not need to push them if you are evaluating the tool).
 
 ```bash
 git checkout master
@@ -65,14 +65,33 @@ mvn test
 [WARNING] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
 ```
 There is nothing new at this moment, but it has generated - as a hidden git note 
-(`refs/notes/tests`) - a report about which sources are related with each one of your test methods.
+(`refs/notes/tests`).
 
-If you want to check the generated report, run the following command:
+Now, you can proceed to the next section (Run Tests Incrementally), or if 
+you have curious mind and you want to check the contents of the generated report, 
+run the following commands:
 
 ```bash
 export GIT_NOTES_REF=refs/notes/tests
 git notes show
 ```
+A report, similar to the next one, will be printed in your console.
+
+```json
+[
+  {
+    "test": "CalculatorTest",
+    "method": "testSum",
+    "classes": [
+      "Calculator"
+     ]
+  }
+  ...
+]
+```
+
+This report specifies classes that are instantiated for each one 
+of your test methods.
 
 ### Run Tests Incrementally
 
