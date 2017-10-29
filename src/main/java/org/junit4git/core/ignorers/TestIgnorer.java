@@ -49,12 +49,14 @@ public class TestIgnorer {
         boolean found = false;
         while(it.hasNext() && !found) {
             String className = it.next();
-            found = className.contains(toFileName(testClassName));
+            if (!className.endsWith(".class")) {
+                found = className.contains(toFilePath(testClassName));
+            }
         }
         return found;
     }
 
-    private String toFileName(String name) {
+    private String toFilePath(String name) {
         return name.replaceAll("\\.", "/");
     }
 

@@ -9,11 +9,14 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public class AgentClassTransformer implements ClassFileTransformer {
 
     private static Set<String> referencedClasses = new LinkedHashSet<>();
+
+    private static String CLASS_EXTENSION = ".class";
 
     public static void createContext() {
         referencedClasses = new LinkedHashSet<>();
@@ -24,7 +27,9 @@ public class AgentClassTransformer implements ClassFileTransformer {
     }
 
     protected boolean belongsToAJarFile(ProtectionDomain protectionDomain) {
-        return protectionDomain.getCodeSource().getLocation().getPath().endsWith(".jar");
+        return Optional.of(protectionDomain.getCodeSource())
+                .map(source -> source.getLocation().getPath().endsWith(".jar"))
+                .orElse(true);
     }
 
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
@@ -39,7 +44,11 @@ public class AgentClassTransformer implements ClassFileTransformer {
     }
 
     private String normalizeName(String className) {
-        return className.replaceAll("/", "\\.");
+        String aux = className.replaceAll("/", "\\.");
+        if (aux.endsWith(CLASS_EXTENSION)) {
+            aux = aux.substring(0, aux.length() - CLASS_EXTENSION.length());
+        }
+        return aux;
     }
 
     public byte[] instrumentConstructors(String className, byte[] classfileBuffer) {
@@ -50,7 +59,7 @@ public class AgentClassTransformer implements ClassFileTransformer {
             for(CtConstructor ctConstructor: clazz.getConstructors()) {
                 try {
                     ctConstructor.insertAfter(AgentClassTransformer.class.getName()
-                            + ".add(\"" + className +"\");");
+                            + ".add(\"" + clazz.getName() +"\");");
 
                 } catch (CannotCompileException e) {
                     e.printStackTrace();
