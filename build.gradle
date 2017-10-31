@@ -1,4 +1,4 @@
-group 'org.junit4git'
+group 'org.walkmod'
 version '1.0'
 
 buildscript {

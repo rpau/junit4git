@@ -1,4 +1,4 @@
-package org.junit4git.core;
+package org.walkmod.junit4git.core;
 
 
 import com.ea.agentloader.AgentLoader;

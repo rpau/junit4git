@@ -1,8 +1,8 @@
-package org.junit4git.core.reports;
+package org.walkmod.junit4git.core.reports;
 
 
 import com.google.gson.*;
-import org.junit4git.core.AgentClassTransformer;
+import org.walkmod.junit4git.core.AgentClassTransformer;
 
 import java.io.*;
 import java.util.Set;

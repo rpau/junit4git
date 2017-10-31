@@ -44,7 +44,7 @@ Add the following junit listener into your Maven tests executor:
        <properties>
          <property>
            <name>listener</name>
-           <value>org.junit4git.junit4.Junit4GitListener</value>
+           <value>org.walkmod.junit4git.junit4.Junit4GitListener</value>
          </property>
        </properties>
      </configuration>

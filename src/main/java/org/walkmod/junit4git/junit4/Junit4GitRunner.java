@@ -1,4 +1,4 @@
-package org.junit4git.junit4;
+package org.walkmod.junit4git.junit4;
 
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;

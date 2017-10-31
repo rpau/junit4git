@@ -1,4 +1,4 @@
-package org.junit4git.core.ignorers;
+package org.walkmod.junit4git.core.ignorers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -15,7 +15,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Ignore;
-import org.junit4git.core.reports.AbstractReportUpdater;
+import org.walkmod.junit4git.core.reports.AbstractReportUpdater;
 
 import java.io.*;
 import java.lang.instrument.ClassDefinition;

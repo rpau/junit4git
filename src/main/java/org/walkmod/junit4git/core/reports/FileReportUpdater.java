@@ -1,4 +1,4 @@
-package org.junit4git.core.reports;
+package org.walkmod.junit4git.core.reports;
 
 
 

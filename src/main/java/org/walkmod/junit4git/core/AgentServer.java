@@ -1,10 +1,10 @@
-package org.junit4git.core;
+package org.walkmod.junit4git.core;
 
 import com.google.gson.*;
 import fi.iki.elonen.NanoHTTPD;
-import org.junit4git.core.reports.AbstractReportUpdater;
-import org.junit4git.core.reports.GitNotesReportUpdater;
-import org.junit4git.core.ignorers.TestIgnorer;
+import org.walkmod.junit4git.core.reports.AbstractReportUpdater;
+import org.walkmod.junit4git.core.reports.GitNotesReportUpdater;
+import org.walkmod.junit4git.core.ignorers.TestIgnorer;
 
 import java.io.*;
 import java.lang.instrument.Instrumentation;

@@ -1,4 +1,4 @@
-package org.junit4git.core;
+package org.walkmod.junit4git.core;
 
 
 import com.google.gson.JsonArray;
@@ -6,8 +6,8 @@ import com.google.gson.JsonObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit4git.core.reports.FileReportUpdater;
-import org.junit4git.junit4.Junit4GitRunner;
+import org.walkmod.junit4git.core.reports.FileReportUpdater;
+import org.walkmod.junit4git.junit4.Junit4GitRunner;
 
 import java.io.IOException;
 import java.io.StringWriter;

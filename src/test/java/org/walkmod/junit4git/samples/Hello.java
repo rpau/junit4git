@@ -1,4 +1,4 @@
-package org.junit4git.samples;
+package org.walkmod.junit4git.samples;
 
 /**
  * Created by raquelpau on 8/10/17.

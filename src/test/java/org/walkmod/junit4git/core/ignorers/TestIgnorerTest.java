@@ -1,12 +1,12 @@
-package org.junit4git.core.ignorers;
+package org.walkmod.junit4git.core.ignorers;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit4git.core.reports.FileReportUpdater;
-import org.junit4git.junit4.Junit4GitRunner;
+import org.walkmod.junit4git.core.reports.FileReportUpdater;
+import org.walkmod.junit4git.junit4.Junit4GitRunner;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,7 +83,7 @@ public class TestIgnorerTest {
         TestIgnorer resolver = new TestIgnorer(new FileReportUpdater()){
             @Override
             protected Set<String> runGitStatus() throws IOException, GitAPIException {
-                return new HashSet<>(Arrays.asList("org/junit4git/samples/Hello.java"));
+                return new HashSet<>(Arrays.asList("org/walkmod/junit4git/samples/Hello.java"));
             }
         };
         Set<String> result = resolver.getTestsToIgnore(IOUtils.toInputStream(

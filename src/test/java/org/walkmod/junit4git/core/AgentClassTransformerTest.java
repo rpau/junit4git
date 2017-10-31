@@ -1,9 +1,8 @@
-package org.junit4git.core;
+package org.walkmod.junit4git.core;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 

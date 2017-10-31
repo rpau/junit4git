@@ -1,8 +1,8 @@
-package org.junit4git.samples;
+package org.walkmod.junit4git.samples;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit4git.junit4.Junit4GitRunner;
+import org.walkmod.junit4git.junit4.Junit4GitRunner;
 
 
 @RunWith(Junit4GitRunner.class)

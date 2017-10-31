@@ -1,8 +1,8 @@
-package org.junit4git.junit4;
+package org.walkmod.junit4git.junit4;
 
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunListener;
-import org.junit4git.core.AgentClient;
+import org.walkmod.junit4git.core.AgentClient;
 
 public class Junit4GitListener extends RunListener {
 
