@@ -1,11 +1,10 @@
 ![Logo](logo.png?raw=true&v=4&s=200)
 
-[![Build Status](https://travis-ci.org/rpau/smart-testing.svg?branch=master)](https://travis-ci.org/rpau/smart-testing)
-[![codecov](https://codecov.io/gh/rpau/smart-testing/branch/master/graph/badge.svg)](https://codecov.io/gh/rpau/smart-testing)
+[![Build Status](https://travis-ci.org/rpau/junit4git.svg?branch=master)](https://travis-ci.org/rpau/junit4git)
+[![codecov](https://codecov.io/gh/rpau/junit4git/branch/master/graph/badge.svg)](https://codecov.io/gh/rpau/junit4git)
 
-This is a JUnit extension that resolves which, at runtime,
-skips those tests that are not related with your last changes in your
-Git repository. This is not a new idea, since big companies, specially
+This is a JUnit extension that ignores those tests that are not related with 
+your last changes in yourGit repository. This is not a new idea, since big companies, specially
 with big mono-repos have worked on it.
 
 [Martin Fowler](https://martinfowler.com/articles/rise-test-impact-analysis.html)
@@ -27,7 +26,7 @@ These instructions will get you a copy of the project up and running on your loc
 Declare a new test dependency in your pom.xml:
 ```xml
   <dependency>
-    <groupId>org.junit4git</groupId>
+    <groupId>org.walkmod</groupId>
     <artifactId>junit4git</artifactId>
     <version>1.0</version>
     <scope>test</scope>
