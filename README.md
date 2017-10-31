@@ -1,7 +1,7 @@
 ![Logo](logo.png?raw=true&v=4&s=200)
 
 [![Build Status](https://travis-ci.org/rpau/junit4git.svg?branch=master)](https://travis-ci.org/rpau/junit4git)
-[![codecov](https://codecov.io/gh/rpau/junit4git/branch/master/graph/badge.svg)](https://codecov.io/gh/rpau/junit4git)
+[![codecov](https://codecov.io/gh/rpau/smart-testing/branch/master/graph/badge.svg)](https://codecov.io/gh/rpau/smart-testing)
 
 This is a JUnit extension that ignores those tests that are not related with 
 your last changes in yourGit repository. This is not a new idea, since big companies, specially
