@@ -98,4 +98,52 @@ public class TestIgnorerTest {
         Assert.assertEquals(Collections.EMPTY_SET, result);
     }
 
+    @Test
+    public void whenThereAreNestedClassesThenTheParentClassIsUsed() throws Exception {
+        TestIgnorer resolver = new TestIgnorer(new FileReportUpdater()){
+            @Override
+            protected Set<String> runGitStatus() throws IOException, GitAPIException {
+                return new HashSet<>(Arrays.asList("org/walkmod/junit4git/samples/Hello.java"));
+            }
+        };
+        Set<String> result = resolver.getTestsToIgnore(IOUtils.toInputStream(
+                "[{\n" +
+                        "  \"test\": \"MyTest\",\n" +
+                        "  \"method\": \"testMethod\",\n" +
+                        "  \"classes\": [\n" +
+                        "    \"Hello$NestedClass\"\n" +
+                        "  ]\n" +
+                        "}]", Charset.forName("UTF-8")));
+
+        Assert.assertEquals(Collections.EMPTY_SET, result);
+    }
+
+    @Test
+    public void whenThereAreClassesWithSameSuffixCorrectOnesAreIgnored() throws Exception {
+        TestIgnorer resolver = new TestIgnorer(new FileReportUpdater()){
+            @Override
+            protected Set<String> runGitStatus() throws IOException, GitAPIException {
+                return new HashSet<>(Arrays.asList(
+                        "org/walkmod/junit4git/samples/Hello.java"));
+            }
+        };
+        Set<String> result = resolver.getTestsToIgnore(IOUtils.toInputStream(
+                "[{\n" +
+                        "  \"test\": \"MyTest\",\n" +
+                        "  \"method\": \"testMethod\",\n" +
+                        "  \"classes\": [\n" +
+                        "    \"Hello\"\n" +
+                        "  ]\n" +
+                        "},{" +
+                        "  \"test\": \"MyTest2\",\n" +
+                        "  \"method\": \"testMethod2\",\n" +
+                        "  \"classes\": [\n" +
+                        "    \"Hello2\"\n" +
+                        "  ]\n" +
+                        "}"+
+                        "]", Charset.forName("UTF-8")));
+
+        Assert.assertEquals(new HashSet<>(Arrays.asList("MyTest2#testMethod2")), result);
+    }
+
 }

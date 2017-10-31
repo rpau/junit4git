@@ -44,16 +44,37 @@ public class TestIgnorer {
         }
     }
 
-    private boolean isModified(String testClassName, Set<String> status) {
+    private boolean isModified(String className, Set<String> status) {
         Iterator<String> it = status.iterator();
         boolean found = false;
         while(it.hasNext() && !found) {
-            String className = it.next();
-            if (!className.endsWith(".class")) {
-                found = className.contains(toFilePath(testClassName));
+            String statusFile = it.next();
+            if (!statusFile.endsWith(".class")) {
+                found = matchesWithFile(className, statusFile);
             }
         }
         return found;
+    }
+
+    protected boolean matchesWithFile(String className, String statusFile) {
+        String testFilePath = toFilePath(getParentClassName(className));
+        return fileWithoutExtension(statusFile).endsWith(testFilePath);
+    }
+
+    private String fileWithoutExtension(String statusFile) {
+        int index = statusFile.lastIndexOf(".");
+        if (index > -1) {
+            return statusFile.substring(0, index);
+        }
+        return statusFile;
+    }
+
+    private String getParentClassName(String className) {
+        int innerClassIndex = className.indexOf("$");
+        if (innerClassIndex > -1) {
+            return className.substring(0, innerClassIndex);
+        }
+        return className;
     }
 
     private String toFilePath(String name) {
