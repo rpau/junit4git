@@ -28,7 +28,7 @@ Declare a new test dependency in your pom.xml:
   <dependency>
     <groupId>org.walkmod</groupId>
     <artifactId>junit4git</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <scope>test</scope>
   </dependency>
 ```

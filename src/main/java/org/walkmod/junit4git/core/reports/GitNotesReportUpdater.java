@@ -14,6 +14,10 @@ import org.eclipse.jgit.util.StringUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class GitNotesReportUpdater extends AbstractReportUpdater {
 
@@ -137,16 +141,19 @@ public class GitNotesReportUpdater extends AbstractReportUpdater {
 
     private boolean isInMasterAndClean(Git git) throws GitAPIException, IOException {
         if (git.getRepository().getBranch().equals(BASE_BRANCH)) {
-            Status status = git.status().call();
-            if (status.getChanged().isEmpty() && status.getModified().isEmpty()) {
-                return !(status.getAdded().stream()
-                        .filter(file -> file.endsWith(".java"))
-                        .findFirst()
-                        .isPresent());
-            }
+
+            Ref baseBranch = git.getRepository().findRef("origin/master");
+            Ref headBranch = git.getRepository().findRef(git.getRepository().getBranch());
+
+            RevWalk walk = new RevWalk(git.getRepository());
+
+            RevCommit baseCommit = walk.parseCommit(baseBranch.getObjectId());
+            RevCommit headCommit = walk.parseCommit(headBranch.getObjectId());
+            return baseCommit.equals(headCommit);
         }
         return false;
     }
+
 
     private static class GitNotesWriter extends StringWriter {
 
