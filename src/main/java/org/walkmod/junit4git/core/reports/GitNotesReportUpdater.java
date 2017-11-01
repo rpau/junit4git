@@ -9,6 +9,7 @@ import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.notes.Note;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.util.StringUtils;
 
 import java.io.*;
@@ -23,16 +24,25 @@ public class GitNotesReportUpdater extends AbstractReportUpdater {
     public void removeContents() {
         try {
             Git git = open();
-            Ref ref = git.getRepository().findRef(GIT_NOTES_REF);
+            Ref ref = fetchNotesRef(git);
             if (ref == null) {
                 createGitNotesRef(git);
-                if (isInMasterAndClean(git)) {
-                    removeLastNote(git);
-                }
+            }
+            if (isInMasterAndClean(git)) {
+                removeLastNote(git);
             }
         } catch (Exception e) {
             throw new RuntimeException("Error removing the existing Git notes in " + GIT_NOTES_REF, e);
         }
+    }
+
+    public Ref fetchNotesRef(Git git) throws IOException, GitAPIException{
+        Ref ref = git.getRepository().findRef(GIT_NOTES_REF);
+        git.fetch().setRemote("origin")
+                .setDryRun(false)
+                .setRefSpecs(new RefSpec(GIT_NOTES_REF+ ":" + GIT_NOTES_REF))
+                .call();
+        return ref;
     }
 
     private void removeLastNote(Git git) throws IOException, GitAPIException {
@@ -50,14 +60,15 @@ public class GitNotesReportUpdater extends AbstractReportUpdater {
 
     @Override
     public InputStream getBaseReport() throws IOException {
-        return new ByteArrayInputStream(getNotes().getBytes());
+        String notes = getNotes();
+        return new ByteArrayInputStream(notes.getBytes());
     }
 
     private Ref getHead(Git git) throws IOException {
         return git.getRepository().findRef("refs/heads/" + BASE_BRANCH);
     }
 
-    private  Git open() throws IOException  {
+    protected Git open() throws IOException  {
         return Git.open(new File(".").getCanonicalFile());
     }
 
@@ -70,6 +81,8 @@ public class GitNotesReportUpdater extends AbstractReportUpdater {
         Git git = open();
 
         try {
+            fetchNotesRef(git);
+
             RevWalk walk = new RevWalk(git.getRepository());
             RevCommit commit = walk.parseCommit(getHead(git).getObjectId());
             Note note = git.notesShow().setNotesRef(GIT_NOTES_REF)
