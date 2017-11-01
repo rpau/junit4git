@@ -4,10 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.walkmod.junit4git.core.reports.FileReportUpdater;
-import org.walkmod.junit4git.junit4.Junit4GitRunner;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -16,7 +13,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-@RunWith(Junit4GitRunner.class)
 public class TestIgnorerTest {
 
     @Test

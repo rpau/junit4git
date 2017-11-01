@@ -21,6 +21,16 @@ public class GitNotesReportUpdater extends AbstractReportUpdater {
 
     private static String GIT_NOTES_REF = "refs/notes/tests";
 
+    private final String executionDir;
+
+    public GitNotesReportUpdater(){
+        this(".");
+    }
+
+    public GitNotesReportUpdater(String executionDir) {
+        this.executionDir = executionDir;
+    }
+
     public void removeContents() {
         try {
             Git git = open();
@@ -38,23 +48,30 @@ public class GitNotesReportUpdater extends AbstractReportUpdater {
 
     public Ref fetchNotesRef(Git git) throws IOException, GitAPIException{
         Ref ref = git.getRepository().findRef(GIT_NOTES_REF);
-        git.fetch().setRemote("origin")
-                .setDryRun(false)
-                .setRefSpecs(new RefSpec(GIT_NOTES_REF+ ":" + GIT_NOTES_REF))
-                .call();
+        boolean isInRemote = git.lsRemote().call().stream()
+                    .filter(remoteRef -> remoteRef.getName().equals(GIT_NOTES_REF))
+                    .findFirst()
+                    .isPresent();
+
+        if (isInRemote) {
+            git.fetch().setRemote("origin")
+                    .setDryRun(false)
+                    .setRefSpecs(new RefSpec(GIT_NOTES_REF + ":" + GIT_NOTES_REF))
+                    .call();
+        }
         return ref;
     }
 
     private void removeLastNote(Git git) throws IOException, GitAPIException {
         RevWalk walk = new RevWalk(git.getRepository());
-        RevCommit commit = walk.parseCommit(getHead(git).getObjectId());
+        RevCommit commit = walk.parseCommit(getOriginHead(git).getObjectId());
         git.notesRemove().setNotesRef(GIT_NOTES_REF)
                 .setObjectId(commit).call();
     }
 
     private void createGitNotesRef(Git git) throws IOException {
         RefUpdate ru = git.getRepository().getRefDatabase().newUpdate(GIT_NOTES_REF, true);
-        ru.setNewObjectId(getHead(git).getObjectId());
+        ru.setNewObjectId(getOriginHead(git).getObjectId());
         ru.update();
     }
 
@@ -64,12 +81,12 @@ public class GitNotesReportUpdater extends AbstractReportUpdater {
         return new ByteArrayInputStream(notes.getBytes());
     }
 
-    private Ref getHead(Git git) throws IOException {
-        return git.getRepository().findRef("refs/heads/" + BASE_BRANCH);
+    private Ref getOriginHead(Git git) throws IOException {
+        return git.getRepository().findRef("origin/" + BASE_BRANCH);
     }
 
     protected Git open() throws IOException  {
-        return Git.open(new File(".").getCanonicalFile());
+        return Git.open(new File(executionDir).getCanonicalFile());
     }
 
     @Override
@@ -84,7 +101,7 @@ public class GitNotesReportUpdater extends AbstractReportUpdater {
             fetchNotesRef(git);
 
             RevWalk walk = new RevWalk(git.getRepository());
-            RevCommit commit = walk.parseCommit(getHead(git).getObjectId());
+            RevCommit commit = walk.parseCommit(getOriginHead(git).getObjectId());
             Note note = git.notesShow().setNotesRef(GIT_NOTES_REF)
                     .setObjectId(commit).call();
 
@@ -145,7 +162,7 @@ public class GitNotesReportUpdater extends AbstractReportUpdater {
                 Git git = updater.open();
                 try {
                     RevWalk walk = new RevWalk(git.getRepository());
-                    RevCommit commit = walk.parseCommit(updater.getHead(git).getObjectId());
+                    RevCommit commit = walk.parseCommit(updater.getOriginHead(git).getObjectId());
                     git.notesAdd().setNotesRef(GIT_NOTES_REF)
                             .setObjectId(commit)
                             .setMessage(str).call();
