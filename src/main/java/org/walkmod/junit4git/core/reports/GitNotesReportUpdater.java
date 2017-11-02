@@ -149,7 +149,8 @@ public class GitNotesReportUpdater extends AbstractReportUpdater {
 
             RevCommit baseCommit = walk.parseCommit(baseBranch.getObjectId());
             RevCommit headCommit = walk.parseCommit(headBranch.getObjectId());
-            return baseCommit.equals(headCommit);
+            
+            return baseCommit.equals(headCommit) && git.status().call().isClean();
         }
         return false;
     }
