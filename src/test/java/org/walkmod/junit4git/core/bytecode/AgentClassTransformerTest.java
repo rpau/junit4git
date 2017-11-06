@@ -1,7 +1,9 @@
-package org.walkmod.junit4git.core;
+package org.walkmod.junit4git.core.bytecode;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.walkmod.junit4git.core.Dummy;
+import org.walkmod.junit4git.core.bytecode.AgentClassTransformer;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -31,11 +33,11 @@ public class AgentClassTransformerTest {
 
     @Test
     public void whenAClassIsLoadedThenConstructorsBecomeInstrumented() throws Exception {
-        AgentClassTransformer.destroyContext();
+        AgentClassTransformer.cleanUp();
         ClassLoader classLoader = new TransformingClassLoader("Dummy");
         Class<?> clazz = classLoader.loadClass(Dummy.class.getName());
         clazz.newInstance();
         Assert.assertEquals(new LinkedHashSet<String>(Arrays.asList(Dummy.class.getName())),
-                AgentClassTransformer.destroyContext());
+                AgentClassTransformer.getReferencedClasses());
     }
 }

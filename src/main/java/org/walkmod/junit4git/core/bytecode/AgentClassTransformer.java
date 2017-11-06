@@ -1,4 +1,4 @@
-package org.walkmod.junit4git.core;
+package org.walkmod.junit4git.core.bytecode;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -18,10 +18,14 @@ public class AgentClassTransformer implements ClassFileTransformer {
 
     private static String CLASS_EXTENSION = ".class";
 
-    public static void createContext() {
+    public static void cleanUp() {
         referencedClasses = new LinkedHashSet<>();
     }
 
+    /**
+     * Stores a new reference. It is called by the application constructors.
+     * @param name full class name to store
+     */
     public static void add(String name) {
         referencedClasses.add(name);
     }
@@ -58,6 +62,7 @@ public class AgentClassTransformer implements ClassFileTransformer {
             clazz.defrost();
             for(CtConstructor ctConstructor: clazz.getConstructors()) {
                 try {
+                    //here we are calling the static add method of this class
                     ctConstructor.insertAfter(AgentClassTransformer.class.getName()
                             + ".add(\"" + clazz.getName() +"\");");
 
@@ -73,7 +78,7 @@ public class AgentClassTransformer implements ClassFileTransformer {
         return classfileBuffer;
     }
 
-    public static Set<String> destroyContext() {
+    public static Set<String> getReferencedClasses() {
         return referencedClasses;
     }
 }

@@ -37,6 +37,7 @@ dependencies {
     compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.8.0.201706111038-r'
     compile group: 'org.javassist', name: 'javassist', version: '3.22.0-GA'
     testCompile group: 'commons-io', name: 'commons-io', version: '2.5'
+    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
 }
 
 javadoc {

@@ -2,16 +2,15 @@ package org.walkmod.junit4git.core.reports;
 
 
 import com.google.gson.*;
-import org.walkmod.junit4git.core.AgentClassTransformer;
 
 import java.io.*;
 import java.util.Set;
 
-public abstract class AbstractReportUpdater {
+public abstract class AbstractTestReportStorage {
 
     protected Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    public void removeContents() {
+    public void prepare() {
         try (Writer writer = buildWriter()){
             writer.write("");
             writer.flush();
@@ -52,39 +51,14 @@ public abstract class AbstractReportUpdater {
         }
     }
 
-    private JsonObject toTestResult(String testClass, String testMethod, Set<String> referencedClasses) {
-        JsonObject object = new JsonObject();
-        object.addProperty("test", testClass);
-        object.addProperty("method", testMethod);
-        object.add("classes", toJsonArray(referencedClasses));
-        return object;
-    }
-
     private JsonArray toJsonArray(Set<String> array) {
         JsonArray res = new JsonArray();
         array.forEach(value -> res.add(value));
         return res;
     }
 
-    protected Set<String> getReferencedClasses() {
-        return AgentClassTransformer.destroyContext();
+    public void addTestReport(TestReport report) {
+        appendTestResult(gson.toJsonTree(report).getAsJsonObject(), readReport());
     }
 
-    protected void onEnd(String event, String testClass, String testMethod, Set<String> referencedClasses) {
-
-        appendTestResult(toTestResult(testClass, testMethod, referencedClasses), readReport());
-    }
-
-    protected void onStart(String event, String testClass, String testMethod) {
-        AgentClassTransformer.createContext();
-    }
-
-    public void update(String event, String testClass, String testMethod){
-        Set<String> referencedClasses = getReferencedClasses();
-        if ("start".equals(event)) {
-            onStart(event, testClass, testMethod);
-        } else {
-            onEnd(event, testClass, testMethod, referencedClasses);
-        }
-    }
 }

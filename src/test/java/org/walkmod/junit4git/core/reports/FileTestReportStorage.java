@@ -4,7 +4,7 @@ package org.walkmod.junit4git.core.reports;
 
 import java.io.*;
 
-public class FileReportUpdater extends AbstractReportUpdater {
+public class FileTestReportStorage extends AbstractTestReportStorage {
 
 
     private File report = new File("smart-testing-report.json");

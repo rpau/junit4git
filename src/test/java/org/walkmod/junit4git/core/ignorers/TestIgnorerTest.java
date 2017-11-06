@@ -4,8 +4,8 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Assert;
 import org.junit.Test;
-import org.walkmod.junit4git.core.reports.AbstractReportUpdater;
-import org.walkmod.junit4git.core.reports.FileReportUpdater;
+import org.walkmod.junit4git.core.reports.AbstractTestReportStorage;
+import org.walkmod.junit4git.core.reports.FileTestReportStorage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -20,11 +20,11 @@ public class TestIgnorerTest {
 
         private Set<String> files;
 
-        public MockedTestIgnorer(AbstractReportUpdater updater) {
+        public MockedTestIgnorer(AbstractTestReportStorage updater) {
             this(Collections.EMPTY_SET, updater);
         }
 
-        public MockedTestIgnorer(Set<String> files, AbstractReportUpdater updater) {
+        public MockedTestIgnorer(Set<String> files, AbstractTestReportStorage updater) {
             super(updater);
             this.files = files;
         }
@@ -41,15 +41,15 @@ public class TestIgnorerTest {
     }
 
     @Test
-    public void whenThereAreNoTestsThenNothingIsIgnored() throws Exception {
-        TestIgnorer resolver = new MockedTestIgnorer(new FileReportUpdater());
+    public void when_there_are_no_tests_then_nothing_is_ignored() throws Exception {
+        TestIgnorer resolver = new MockedTestIgnorer(new FileTestReportStorage());
         Set<String> result = resolver.getTestsToIgnore(IOUtils.toInputStream("[]", Charset.forName("UTF-8")));
         Assert.assertEquals(Collections.EMPTY_SET, result);
     }
 
     @Test
-    public void whenThereIsATestWhichIsNotModifiedThenIsIgnored() throws Exception {
-        FileReportUpdater updater = new FileReportUpdater() {
+    public void when_there_is_a_test_which_is_not_modified_then_is_ignored() throws Exception {
+        FileTestReportStorage updater = new FileTestReportStorage() {
             @Override
             public InputStream getBaseReport() {
                 return IOUtils.toInputStream(
@@ -70,9 +70,9 @@ public class TestIgnorerTest {
     }
 
     @Test
-    public void whenThereIsATestWhichIsModifiedThenIsNotIgnored() throws Exception {
+    public void when_there_is_a_test_which_is_modified_then_is_not_ignored() throws Exception {
         TestIgnorer resolver = new MockedTestIgnorer(new HashSet<>(Arrays.asList("MyTest.java")),
-                new FileReportUpdater());
+                new FileTestReportStorage());
 
         Set<String> result = resolver.getTestsToIgnore(IOUtils.toInputStream(
                 "[{\n" +
@@ -87,10 +87,10 @@ public class TestIgnorerTest {
     }
 
     @Test
-    public void whenThereIsARefClassWhichIsModifiedThenIsNotIgnored() throws Exception {
+    public void when_there_is_a_ref_class_which_is_modified_then_is_not_ignored() throws Exception {
         TestIgnorer resolver = new MockedTestIgnorer(
                 new HashSet<>(Arrays.asList("org/walkmod/junit4git/samples/Hello.java")),
-                new FileReportUpdater());
+                new FileTestReportStorage());
 
         Set<String> result = resolver.getTestsToIgnore(IOUtils.toInputStream(
                 "[{\n" +
@@ -105,10 +105,10 @@ public class TestIgnorerTest {
     }
 
     @Test
-    public void whenThereAreNestedClassesThenTheParentClassIsUsed() throws Exception {
+    public void when_there_are_nested_classes_then_the_parent_class_is_used() throws Exception {
         TestIgnorer resolver = new MockedTestIgnorer(
                 new HashSet<>(Arrays.asList("org/walkmod/junit4git/samples/Hello.java")),
-                new FileReportUpdater());
+                new FileTestReportStorage());
         Set<String> result = resolver.getTestsToIgnore(IOUtils.toInputStream(
                 "[{\n" +
                         "  \"test\": \"MyTest\",\n" +
@@ -122,9 +122,9 @@ public class TestIgnorerTest {
     }
 
     @Test
-    public void whenThereAreClassesWithSameSuffixCorrectOnesAreIgnored() throws Exception {
+    public void when_there_are_classes_with_same_suffix_correct_ones_are_ignored() throws Exception {
         TestIgnorer resolver = new MockedTestIgnorer(new HashSet<>(Arrays.asList(
-                "org/walkmod/junit4git/samples/Hello.java")), new FileReportUpdater());
+                "org/walkmod/junit4git/samples/Hello.java")), new FileTestReportStorage());
 
         Set<String> result = resolver.getTestsToIgnore(IOUtils.toInputStream(
                 "[{\n" +

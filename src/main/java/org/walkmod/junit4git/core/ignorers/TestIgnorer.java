@@ -16,7 +16,6 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -24,26 +23,25 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.junit.Ignore;
-import org.walkmod.junit4git.core.reports.AbstractReportUpdater;
+import org.walkmod.junit4git.core.reports.AbstractTestReportStorage;
 
 import java.io.*;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class TestIgnorer {
 
-    private final AbstractReportUpdater updater;
+    private final AbstractTestReportStorage updater;
 
     private final String executionDir;
 
-    public TestIgnorer(AbstractReportUpdater updater) {
+    public TestIgnorer(AbstractTestReportStorage updater) {
         this(".", updater);
     }
 
-    public TestIgnorer(String executionDir, AbstractReportUpdater updater) {
+    public TestIgnorer(String executionDir, AbstractTestReportStorage updater) {
         this.updater = updater;
         this.executionDir = executionDir;
     }
