@@ -20,12 +20,16 @@ public class Junit4GitRunner extends BlockJUnit4ClassRunner {
         super(klass);
     }
 
-    @Override
-    public void run(RunNotifier notifier) {
+    protected void setUpListener(RunNotifier notifier) {
         if (listener != null) {
             notifier.addListener(listener);
             listener = null;
         }
+    }
+
+    @Override
+    public void run(RunNotifier notifier) {
+        setUpListener(notifier);
         notifier.fireTestRunStarted(getDescription());
         super.run(notifier);
     }
