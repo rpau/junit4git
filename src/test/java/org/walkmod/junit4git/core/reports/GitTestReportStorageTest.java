@@ -56,7 +56,9 @@ public class GitTestReportStorageTest {
   @Test
   public void when_there_are_git_notes_then_it_removes_the_one_from_the_current_commit() throws Exception {
 
-    GitRepo repo = GitRepoBuilder.builder().withNotes(GIT_NOTES_EXAMPLE).build();
+    GitRepo repo = GitRepoBuilder.builder().committing("test.txt", "test")
+            .withNotes(GIT_NOTES_EXAMPLE)
+            .build();
 
     GitTestReportStorage updater = new GitTestReportStorage(repo.getPath().toFile().getCanonicalPath());
     updater.prepare();
