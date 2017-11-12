@@ -23,8 +23,7 @@ public abstract class AbstractTestReportStorage {
    * Method called before any read or writing operation; whose purpose
    * is to initialize/prepare the required resources.
    */
-  public void prepare() {
-  }
+  public abstract void prepare();
 
   /**
    * Reads the test impact report

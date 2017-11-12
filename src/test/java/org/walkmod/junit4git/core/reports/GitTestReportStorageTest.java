@@ -106,4 +106,24 @@ public class GitTestReportStorageTest {
 
     repo.delete();
   }
+
+  @Test
+  public void when_it_is_clean_it_appends_to_the_report() throws Exception {
+    GitRepo repo = GitRepoBuilder.builder()
+            .committing("FooTest.java", "public FooTest { @org.junit.Test public void test() {} } ")
+            .committing("BarTest.java", "public BarTest { @org.junit.Test public void test() {} } ")
+            .build();
+    GitTestReportStorage updater = new GitTestReportStorage(repo.getPath().toFile().getCanonicalPath());
+    Assert.assertFalse(updater.isReportCreated());
+
+    TestMethodReport report1 = new TestMethodReport("FooTest", "test", Collections.emptySet());
+    TestMethodReport report2 = new TestMethodReport("BarTest", "test", Collections.emptySet());
+    updater.appendTestReport(report1);
+    updater.appendTestReport(report2);
+
+    Assert.assertArrayEquals(new TestMethodReport[] {report1, report2}, updater.getBaseReport());
+
+    repo.delete();
+  }
+
 }
