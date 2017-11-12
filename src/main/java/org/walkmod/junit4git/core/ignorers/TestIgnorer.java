@@ -55,7 +55,7 @@ public class TestIgnorer {
   }
 
   protected Set<TestMethodReport> getTestsToIgnore(TestMethodReport[] report) throws IOException, GitAPIException {
-    if (report.length > 0) {
+    if (report != null && report.length > 0) {
       Set<String> files = getChangedAndCommittedFiles();
       files.addAll(getFilesWithUntrackedChanges());
       return testsToIgnore(files, report);

@@ -8,7 +8,7 @@ import org.junit.runners.model.InitializationError;
 
 public class Junit4GitRunner extends BlockJUnit4ClassRunner {
 
-  private static Junit4GitListener listener = null;
+  protected static Junit4GitListener listener = null;
 
   private static Log log = LogFactory.getLog(Junit4GitRunner.class);
 
