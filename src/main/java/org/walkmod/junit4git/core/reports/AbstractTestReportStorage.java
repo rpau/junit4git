@@ -57,7 +57,7 @@ public abstract class AbstractTestReportStorage {
         return res;
     }
 
-    public void addTestReport(TestReport report) {
+    public void addTestReport(TestMethodReport report) {
         appendTestResult(gson.toJsonTree(report).getAsJsonObject(), readReport());
     }
 

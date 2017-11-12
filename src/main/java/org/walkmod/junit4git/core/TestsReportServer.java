@@ -6,7 +6,7 @@ import org.walkmod.junit4git.core.bytecode.AgentClassTransformer;
 import org.walkmod.junit4git.core.reports.AbstractTestReportStorage;
 import org.walkmod.junit4git.core.reports.GitTestReportStorage;
 import org.walkmod.junit4git.core.ignorers.TestIgnorer;
-import org.walkmod.junit4git.core.reports.TestReport;
+import org.walkmod.junit4git.core.reports.TestMethodReport;
 
 import java.lang.instrument.Instrumentation;
 import java.util.HashMap;
@@ -83,7 +83,7 @@ public class TestsReportServer extends NanoHTTPD {
         if (JUnitEventType.START.getName().equals(event.getEventType())) {
             AgentClassTransformer.cleanUp();
         } else {
-            storage.addTestReport(new TestReport(
+            storage.addTestReport(new TestMethodReport(
                     event.getTestClass(), event.getTestMethod(), referencedClasses));
         }
     }

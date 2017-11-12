@@ -9,14 +9,14 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.walkmod.junit4git.git.GitUtils;
+import org.walkmod.junit4git.jgit.GitUtils;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
 
-public class GitTestReportStorageTest {
+public class GitTestReportStorageTestMethod {
 
     private Git git;
 

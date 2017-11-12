@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.walkmod.junit4git.core.bytecode.AgentClassTransformer;
 import org.walkmod.junit4git.core.reports.AbstractTestReportStorage;
-import org.walkmod.junit4git.core.reports.TestReport;
+import org.walkmod.junit4git.core.reports.TestMethodReport;
 
 import java.util.Collections;
 
@@ -26,7 +26,7 @@ public class TestsReportServerTest {
         AbstractTestReportStorage storage = mock(AbstractTestReportStorage.class);
         TestsReportServer server = new TestsReportServer(storage);
         server.process(new JUnitEvent(JUnitEventType.STOP.getName(), "FooClass", "test_method"));
-        verify(storage).addTestReport(new TestReport("FooClass", "test_method",
+        verify(storage).addTestReport(new TestMethodReport("FooClass", "test_method",
                 AgentClassTransformer.getReferencedClasses()));
     }
 }

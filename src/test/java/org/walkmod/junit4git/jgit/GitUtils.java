@@ -1,4 +1,4 @@
-package org.walkmod.junit4git.git;
+package org.walkmod.junit4git.jgit;
 
 
 import org.eclipse.jgit.api.Git;
@@ -22,7 +22,7 @@ public class GitUtils {
 
     public static Git buildGitRepoForTest(File directory) throws IOException, GitAPIException {
         Git git = Git.init().setDirectory(directory).call();
-        GitUtils.setRemote("http://github.com/user/repo", git);
+        GitUtils.setRemote(directory.toURL().toString(), git);
         GitUtils.emptyCommit(git, "");
         return git;
     }
