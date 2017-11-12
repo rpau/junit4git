@@ -27,6 +27,16 @@ public class AgentClassTransformer implements ClassFileTransformer {
 
   private static Log log = LogFactory.getLog(AgentClassTransformer.class);
 
+  private final JavassistUtils javaassist;
+
+  public AgentClassTransformer() {
+    this(new JavassistUtils());
+  }
+
+  public AgentClassTransformer(JavassistUtils javaassist) {
+    this.javaassist = javaassist;
+  }
+
   /**
    * Cleans the list of referenced classes. It is needed for clean the list of
    * referenced classes between tests.
@@ -80,7 +90,7 @@ public class AgentClassTransformer implements ClassFileTransformer {
    */
   protected byte[] instrumentClass(String name, byte[] classfileBuffer) {
     try {
-      return new JavassistUtils().instrumentClass(name,
+      return javaassist.instrumentClass(name,
               AgentClassTransformer.class.getName()
                       + ".add(\"" + name + "\");");
     } catch (Throwable e) {
