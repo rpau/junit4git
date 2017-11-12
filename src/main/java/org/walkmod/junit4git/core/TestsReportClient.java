@@ -7,6 +7,8 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -20,6 +22,8 @@ public class TestsReportClient {
   private static Boolean loaded = false;
 
   private static Gson gson = new Gson();
+
+  private static Log log = LogFactory.getLog(TestsReportClient.class);
 
   private static final String SERVER_TEST_REPORT_URL = "http://localhost:9000";
 
@@ -52,7 +56,7 @@ public class TestsReportClient {
       client.newCall(request).execute();
 
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Error sending the test request to the server", e);
     }
   }
 }

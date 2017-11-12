@@ -1,5 +1,7 @@
 package org.walkmod.junit4git.junit4;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;
@@ -8,11 +10,13 @@ public class Junit4GitRunner extends BlockJUnit4ClassRunner {
 
   private static Junit4GitListener listener = null;
 
+  private static Log log = LogFactory.getLog(Junit4GitRunner.class);
+
   static {
     try {
       listener = new Junit4GitListener();
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Error launching the Runner ", e);
     }
   }
 

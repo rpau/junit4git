@@ -1,5 +1,7 @@
 package org.walkmod.junit4git.core.bytecode;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.walkmod.junit4git.javassist.JavassistUtils;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -22,6 +24,8 @@ public class AgentClassTransformer implements ClassFileTransformer {
   private static Set<String> referencedClasses = new LinkedHashSet<>();
 
   private static String CLASS_EXTENSION = ".class";
+
+  private static Log log = LogFactory.getLog(AgentClassTransformer.class);
 
   /**
    * Cleans the list of referenced classes. It is needed for clean the list of
@@ -60,11 +64,7 @@ public class AgentClassTransformer implements ClassFileTransformer {
 
     if (className != null && !belongsToAJarFile(protectionDomain)) {
       String normalizedName = normalizeName(className);
-      try {
-        return instrumentClass(normalizedName, classfileBuffer);
-      } catch (Throwable e) {
-        e.printStackTrace();
-      }
+      return instrumentClass(normalizedName, classfileBuffer);
     }
 
     return classfileBuffer;
@@ -84,7 +84,7 @@ public class AgentClassTransformer implements ClassFileTransformer {
               AgentClassTransformer.class.getName()
                       + ".add(\"" + name + "\");");
     } catch (Throwable e) {
-      e.printStackTrace();
+      log.error("Error instrumenting " + name, e);
     }
     return classfileBuffer;
   }

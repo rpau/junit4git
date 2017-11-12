@@ -2,6 +2,8 @@ package org.walkmod.junit4git.core.reports;
 
 
 import com.google.gson.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -16,6 +18,7 @@ public abstract class AbstractTestReportStorage {
 
   protected Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
+  private static Log log = LogFactory.getLog(AbstractTestReportStorage.class);
   /**
    * Method called before any read or writing operation; whose purpose
    * is to initialize/prepare the required resources.
@@ -70,7 +73,7 @@ public abstract class AbstractTestReportStorage {
       writer.write(gson.toJson(baseReport));
       writer.flush();
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error writing the test impact report ", e);
     }
   }
 
@@ -84,6 +87,7 @@ public abstract class AbstractTestReportStorage {
         }
       }
     } catch (Exception e) {
+      log.error("Error reading the test impact report ", e);
     }
     return tests;
   }

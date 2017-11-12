@@ -2,6 +2,8 @@ package org.walkmod.junit4git.core;
 
 import com.google.gson.Gson;
 import fi.iki.elonen.NanoHTTPD;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.walkmod.junit4git.core.bytecode.AgentClassTransformer;
 import org.walkmod.junit4git.core.ignorers.TestIgnorer;
 import org.walkmod.junit4git.core.reports.AbstractTestReportStorage;
@@ -30,6 +32,8 @@ public class TestsReportServer extends NanoHTTPD {
 
   private static Gson gson = new Gson();
 
+  private static Log log = LogFactory.getLog(TestsReportServer.class);
+
   private static int PORT = 9000;
 
   public TestsReportServer() {
@@ -56,6 +60,7 @@ public class TestsReportServer extends NanoHTTPD {
     try {
       session.parseBody(input);
     } catch (Exception e) {
+      log.error("Error parsing the request", e);
     }
   }
 
