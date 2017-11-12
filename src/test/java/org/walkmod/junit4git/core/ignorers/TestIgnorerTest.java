@@ -1,29 +1,23 @@
 package org.walkmod.junit4git.core.ignorers;
 
 import com.google.gson.Gson;
-import org.apache.commons.io.FileUtils;
-import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.walkmod.junit4git.core.reports.AbstractTestReportStorage;
 import org.walkmod.junit4git.core.reports.FileTestReportStorage;
 import org.walkmod.junit4git.core.reports.TestMethodReport;
 import org.walkmod.junit4git.javassist.JavassistUtils;
-import org.walkmod.junit4git.jgit.GitUtils;
+import org.walkmod.junit4git.jgit.GitRepo;
+import org.walkmod.junit4git.jgit.GitRepoBuilder;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.lang.instrument.Instrumentation;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 public class TestIgnorerTest {
 
@@ -95,7 +89,7 @@ public class TestIgnorerTest {
                     "  \"classes\": [\n" +
                     "    \"Hello\"\n" +
                     "  ]\n" +
-                    "}]",TestMethodReport[].class));
+                    "}]", TestMethodReport[].class));
 
     Assert.assertEquals(Collections.EMPTY_SET, result);
   }
@@ -113,7 +107,7 @@ public class TestIgnorerTest {
                     "  \"classes\": [\n" +
                     "    \"Hello\"\n" +
                     "  ]\n" +
-                    "}]",TestMethodReport[].class));
+                    "}]", TestMethodReport[].class));
 
     Assert.assertEquals(Collections.EMPTY_SET, result);
   }
@@ -130,7 +124,7 @@ public class TestIgnorerTest {
                     "  \"classes\": [\n" +
                     "    \"Hello$NestedClass\"\n" +
                     "  ]\n" +
-                    "}]",TestMethodReport[].class));
+                    "}]", TestMethodReport[].class));
 
     Assert.assertEquals(Collections.EMPTY_SET, result);
   }
@@ -154,7 +148,7 @@ public class TestIgnorerTest {
                     "    \"Hello2\"\n" +
                     "  ]\n" +
                     "}" +
-                    "]",TestMethodReport[].class));
+                    "]", TestMethodReport[].class));
 
     Assert.assertEquals(new HashSet<>(Arrays.asList("MyTest2#testMethod2")),
             result.stream().map(TestMethodReport::getTestMethodId).collect(Collectors.toSet()));
@@ -162,29 +156,72 @@ public class TestIgnorerTest {
 
   @Test
   public void when_there_are_changes_in_master_branch_the_updated_files_are_detected() throws Exception {
-    Path path = Files.createTempDirectory("junit-remote-tests");
-    GitUtils.buildGitRepoForTest(path.toFile());
 
-    Path localPath = Files.createTempDirectory("junit-local-tests");
-    try (Git git = Git.cloneRepository().setURI(path.toUri().toString()).setDirectory(localPath.toFile()).call()) {
+    GitRepo parentRepo = GitRepoBuilder.builder().build();
 
-      File aux = new File(localPath.toFile(), "test.txt");
+    GitRepo clonedRepo = GitRepoBuilder.clone(parentRepo)
+            .committing("test.txt", "test")
+            .build();
 
-      try (FileWriter fw = new FileWriter(aux)) {
-        fw.write("test");
-        fw.flush();
-      }
+    TestIgnorer ignorer = new TestIgnorer(clonedRepo.getPath(),
+            mock(AbstractTestReportStorage.class), mock(JavassistUtils.class));
 
-      git.add().addFilepattern(aux.getName()).call();
-      git.commit().setMessage("foo").call();
+    Assert.assertEquals(new HashSet<>(Arrays.asList("test.txt")), ignorer.getChangedAndCommittedFiles());
 
-      TestIgnorer ignorer = new TestIgnorer(localPath.toFile().getCanonicalPath(),
-              mock(AbstractTestReportStorage.class), mock(JavassistUtils.class));
-
-      Assert.assertEquals(new HashSet<>(Arrays.asList("test.txt")), ignorer.getChangedAndCommittedFiles());
-
-      FileUtils.deleteDirectory(path.toFile());
-      FileUtils.deleteDirectory(localPath.toFile());
-    }
+    parentRepo.delete();
+    clonedRepo.delete();
   }
+
+  @Test
+  public void when_there_are_untracked_changes_the_updated_files_are_detected() throws Exception {
+    GitRepo parentRepo = GitRepoBuilder.builder()
+            .committing("test.txt", "committed text")
+            .build();
+
+    GitRepo clonedRepo = GitRepoBuilder.clone(parentRepo)
+            .modifying("test.txt", "modified text")
+            .build();
+
+    TestIgnorer ignorer = new TestIgnorer(clonedRepo.getPath(),
+            mock(AbstractTestReportStorage.class), mock(JavassistUtils.class));
+
+    Assert.assertEquals(new HashSet<>(Arrays.asList("test.txt")), ignorer.getFilesWithUntrackedChanges());
+
+    parentRepo.delete();
+    clonedRepo.delete();
+  }
+
+  @Test
+  public void resolves_the_tests_to_ignore() throws Exception {
+
+    //initializing repos
+    GitRepo repo = GitRepoBuilder.builder()
+            .committing("Test.java", "public class Test { @org.junit.Test public void testFoo() {} }")
+            .build();
+    GitRepo clonedRepo = GitRepoBuilder.clone(repo).build();
+
+    //preparing mocks
+    JavassistUtils javassist = mock(JavassistUtils.class);
+
+    AbstractTestReportStorage storage = mock(AbstractTestReportStorage.class);
+    TestMethodReport methodReport = new TestMethodReport("Test", "foo", Collections.EMPTY_SET);
+    when(storage.getBaseReport()).thenReturn(new TestMethodReport[]{methodReport});
+
+    //preparing test ignorer
+    TestIgnorer ignorer = new TestIgnorer(clonedRepo.getPath().toFile().getCanonicalPath(),
+            storage, javassist);
+
+    Instrumentation inst = mock(Instrumentation.class);
+    ignorer.ignoreTests(inst);
+
+    //validating results
+    Map<String, List<TestMethodReport>> testsToIgnore = new HashMap<>();
+    testsToIgnore.put("Test", Arrays.asList(methodReport));
+    verify(javassist).annotateMethods(Ignore.class, inst, testsToIgnore);
+
+    //deleting repos
+    repo.delete();
+    clonedRepo.delete();
+  }
+
 }

@@ -13,6 +13,7 @@ import org.walkmod.junit4git.jgit.JGitUtils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,7 @@ import java.util.stream.Stream;
  */
 public class TestIgnorer {
 
-  private final AbstractTestReportStorage updater;
+  private final AbstractTestReportStorage storage;
 
   private final String executionDir;
 
@@ -34,16 +35,21 @@ public class TestIgnorer {
 
   private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-  public TestIgnorer(AbstractTestReportStorage updater) {
-    this(".", updater);
+  public TestIgnorer(AbstractTestReportStorage storage) {
+    this(".", storage);
   }
 
-  public TestIgnorer(String executionDir, AbstractTestReportStorage updater) {
-    this(executionDir, updater, new JavassistUtils());
+  public TestIgnorer(String executionDir, AbstractTestReportStorage storage) {
+    this(executionDir, storage, new JavassistUtils());
   }
 
-  public TestIgnorer(String executionDir, AbstractTestReportStorage updater, JavassistUtils javassist) {
-    this.updater = updater;
+  public TestIgnorer(Path executionDir, AbstractTestReportStorage storage, JavassistUtils javassist)
+          throws IOException {
+    this(executionDir.toFile().getCanonicalPath(), storage, javassist);
+  }
+
+  public TestIgnorer(String executionDir, AbstractTestReportStorage storage, JavassistUtils javassist) {
+    this.storage = storage;
     this.executionDir = executionDir;
     this.javassist = javassist;
   }
@@ -100,7 +106,7 @@ public class TestIgnorer {
   }
 
   private Map<String, List<TestMethodReport>> testsGroupedByClass() throws Exception {
-    return getTestsToIgnore(updater.getBaseReport()).stream()
+    return getTestsToIgnore(storage.getBaseReport()).stream()
             .collect(Collectors.groupingBy(TestMethodReport::getTestClass));
   }
 
