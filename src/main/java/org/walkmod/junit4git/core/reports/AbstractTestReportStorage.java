@@ -21,12 +21,6 @@ public abstract class AbstractTestReportStorage {
    * is to initialize/prepare the required resources.
    */
   public void prepare() {
-    try (Writer writer = buildWriter()) {
-      writer.write("");
-      writer.flush();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
   }
 
   /**

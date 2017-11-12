@@ -36,6 +36,11 @@ public class GitRepoBuilder {
     return this;
   }
 
+  public GitRepoBuilder withNotes(String notes) {
+    repo.setNotes(notes);
+    return this;
+  }
+
   public GitRepo build() {
      repo.init();
      return repo;

@@ -73,7 +73,7 @@ public class GitTestReportStorage extends AbstractTestReportStorage {
             .setObjectId(commit).call();
   }
 
-  protected void createGitNotesRef(Git git) throws IOException {
+  public void createGitNotesRef(Git git) throws IOException {
     RefUpdate ru = git.getRepository().getRefDatabase().newUpdate(GIT_NOTES_REF, true);
     ru.setNewObjectId(getBaseObjectId(git));
     ru.update();

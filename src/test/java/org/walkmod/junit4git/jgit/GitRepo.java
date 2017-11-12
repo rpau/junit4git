@@ -2,6 +2,7 @@ package org.walkmod.junit4git.jgit;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
+import org.walkmod.junit4git.core.reports.GitTestReportStorage;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -16,23 +17,28 @@ public class GitRepo {
   private final Map<String, String> committedFiles;
   private final Map<String, String> modifiedFiles;
 
+  private String notes;
 
-  public GitRepo() {
+  protected GitRepo() {
     this.path = null;
     this.committedFiles = new HashMap<>();
     this.modifiedFiles = new HashMap<>();
   }
 
-  public GitRepo(Path path){
+  protected GitRepo(Path path){
     this.path = path;
     this.committedFiles = new HashMap<>();
     this.modifiedFiles = new HashMap<>();
   }
 
-  public GitRepo(GitRepo repo) {
+  protected GitRepo(GitRepo repo) {
     this.path = repo.path;
     this.committedFiles = repo.committedFiles;
     this.modifiedFiles = repo.modifiedFiles;
+  }
+
+  protected void setNotes(String notes) {
+    this.notes = notes;
   }
 
   public Path getPath() {
@@ -81,6 +87,14 @@ public class GitRepo {
         modifiedFiles.keySet().stream().forEach(file -> {
           writeFile(file, modifiedFiles.get(file));
         });
+
+        if (notes != null) {
+          GitTestReportStorage updater = new GitTestReportStorage();
+          updater.createGitNotesRef(parentGit);
+
+          GitTestReportStorage.GitNotesWriter writer = new GitTestReportStorage.GitNotesWriter(updater);
+          writer.write(notes);
+        }
 
       } catch (Exception e) {
         throw new RuntimeException(e);
