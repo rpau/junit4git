@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.walkmod.junit4git.core.bytecode.AgentClassTransformer;
 import org.walkmod.junit4git.core.reports.AbstractTestReportStorage;
+import org.walkmod.junit4git.core.reports.GitTestReportStorage;
 import org.walkmod.junit4git.core.reports.TestMethodReport;
 
 import java.util.Collections;
@@ -16,7 +17,7 @@ public class TestsReportServerTest {
   @Test
   public void test_when_a_start_event_arrives_the_referenced_classes_of_the_previous_test_are_clean() {
     AgentClassTransformer.add("Foo");
-    TestsReportServer server = new TestsReportServer();
+    TestsReportServer server = new TestsReportServer(new GitTestReportStorage("../."));
     server.process(new JUnitEvent(JUnitEventType.START.getName(), "FooClass", "test_method"));
     Assert.assertEquals(Collections.EMPTY_SET, AgentClassTransformer.getReferencedClasses());
   }

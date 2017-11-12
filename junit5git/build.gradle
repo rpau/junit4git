@@ -1,0 +1,48 @@
+dependencies {
+    compile project(':junit4git')
+    testCompile group: 'commons-io', name: 'commons-io', version: '2.5'
+    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+    compile group: 'org.junit.platform', name: 'junit-platform-launcher', version: '1.0.2'
+    testCompile group: 'org.apiguardian', name: 'apiguardian-api', version: '1.0.0'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+
+            artifact packageJavadoc
+
+            pom.withXml {
+                asNode().children().last() + {
+                    resolveStrategy = Closure.DELEGATE_FIRST
+                    name 'junit5git'
+                    description 'A test library for incremental Junit tests execution'
+                    url 'https://github.com/rpau/junit4git'
+                    scm {
+                        url 'https://github.com/rpau/junit4git'
+                        connection 'https://github.com/rpau/junit4git.git'
+                    }
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/license/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id 'rpau'
+                            name 'Raquel Pau'
+                            email 'rpau@walkmod.com'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+

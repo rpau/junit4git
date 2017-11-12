@@ -2,6 +2,7 @@ package org.walkmod.junit4git.core;
 
 
 import com.google.gson.Gson;
+import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okio.Buffer;
@@ -13,14 +14,16 @@ import org.mockito.ArgumentCaptor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 public class TestsReportClientTest {
 
   @Test
   public void it_produces_a_valid_request() throws IOException {
     OkHttpClient http = mock(OkHttpClient.class);
+    when(http.newCall(any())).thenReturn(mock(Call.class));
+
     TestsReportClient client = new TestsReportClient(http, false);
     ArgumentCaptor<Request> argumentCaptor = ArgumentCaptor.forClass(Request.class);
     client.sendRequestToClassLoggerAgent("FooClass", "bar",

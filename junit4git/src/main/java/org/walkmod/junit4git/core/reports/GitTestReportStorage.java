@@ -28,7 +28,21 @@ public class GitTestReportStorage extends AbstractTestReportStorage {
   private static Log log = LogFactory.getLog(GitTestReportStorage.class);
 
   public GitTestReportStorage() {
-    this(".");
+    try {
+      File parent = new File(".").getCanonicalFile();
+      boolean isGit = new File(parent, ".git").exists();
+      while (parent.getParentFile() != null && !isGit) {
+        parent = parent.getParentFile();
+        isGit = new File(parent, ".git").exists();
+      }
+      if (isGit) {
+        this.executionDir = parent.getCanonicalPath();
+      } else {
+        throw new RuntimeException("It is not a Git repository");
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public GitTestReportStorage(String executionDir) {

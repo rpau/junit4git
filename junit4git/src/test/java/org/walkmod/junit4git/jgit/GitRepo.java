@@ -88,7 +88,7 @@ public class GitRepo {
         });
 
         if (notes != null) {
-          GitTestReportStorage updater = new GitTestReportStorage();
+          GitTestReportStorage updater = new GitTestReportStorage(path.toFile().getCanonicalPath());
           updater.createGitNotesRef(parentGit);
 
           GitTestReportStorage.GitNotesWriter writer = new GitTestReportStorage.GitNotesWriter(updater);

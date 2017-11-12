@@ -26,7 +26,7 @@ public class GitTestReportStorageTest {
 
     GitRepo repo = GitRepoBuilder.builder().withNotes(GIT_NOTES_EXAMPLE).build();
 
-    GitTestReportStorage updater = new GitTestReportStorage();
+    GitTestReportStorage updater = new GitTestReportStorage(repo.getPath().toFile().getCanonicalPath());
     TestMethodReport[] report = updater.getBaseReport();
 
     Assert.assertEquals(GIT_NOTES_EXAMPLE, updater.gson.toJson(report));
