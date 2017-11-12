@@ -25,10 +25,18 @@ public class Junit4GitRunner extends BlockJUnit4ClassRunner {
   }
 
   protected void setUpListener(RunNotifier notifier) {
-    if (listener != null) {
-      notifier.addListener(listener);
-      listener = null;
+    if (getListener() != null) {
+      notifier.addListener(getListener());
+      removeListener();
     }
+  }
+
+  protected Junit4GitListener getListener() {
+    return listener;
+  }
+
+  protected void removeListener() {
+    listener = null;
   }
 
   @Override

@@ -6,7 +6,6 @@ import org.walkmod.junit4git.core.reports.GitTestReportStorage;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -102,7 +101,7 @@ public class GitRepo {
     }
   }
 
-  public void delete() throws IOException {
-    FileUtils.deleteDirectory(path.toFile());
+  public void delete() {
+    FileUtils.deleteQuietly(path.toFile());
   }
 }
