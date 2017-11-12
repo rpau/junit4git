@@ -1,9 +1,6 @@
 package org.walkmod.junit4git.core.bytecode;
 
-import javassist.CannotCompileException;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtConstructor;
+import org.walkmod.junit4git.javassist.JavassistUtils;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -41,9 +38,25 @@ public class AgentClassTransformer implements ClassFileTransformer {
             throws IllegalClassFormatException {
 
         if (className != null && !belongsToAJarFile(protectionDomain)) {
-            return instrumentConstructors(normalizeName(className), classfileBuffer);
+            String normalizedName = normalizeName(className);
+            try {
+                return instrumentClass(normalizedName, classfileBuffer);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
         }
 
+        return classfileBuffer;
+    }
+
+    public byte[] instrumentClass(String name, byte[] classfileBuffer) {
+        try {
+            return new JavassistUtils().instrumentClass(name,
+                    AgentClassTransformer.class.getName()
+                            + ".add(\"" + name + "\");");
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
         return classfileBuffer;
     }
 
@@ -53,29 +66,6 @@ public class AgentClassTransformer implements ClassFileTransformer {
             aux = aux.substring(0, aux.length() - CLASS_EXTENSION.length());
         }
         return aux;
-    }
-
-    public byte[] instrumentConstructors(String className, byte[] classfileBuffer) {
-        ClassPool pool = ClassPool.getDefault();
-        try {
-            CtClass clazz = pool.get(className);
-            clazz.defrost();
-            for(CtConstructor ctConstructor: clazz.getConstructors()) {
-                try {
-                    //here we are calling the static add method of this class
-                    ctConstructor.insertAfter(AgentClassTransformer.class.getName()
-                            + ".add(\"" + clazz.getName() +"\");");
-
-                } catch (CannotCompileException e) {
-                    e.printStackTrace();
-                }
-            }
-            clazz.defrost();
-            return clazz.toBytecode();
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-        return classfileBuffer;
     }
 
     public static Set<String> getReferencedClasses() {

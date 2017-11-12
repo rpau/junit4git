@@ -3,7 +3,6 @@ package org.walkmod.junit4git.core.bytecode;
 import org.junit.Assert;
 import org.junit.Test;
 import org.walkmod.junit4git.core.Dummy;
-import org.walkmod.junit4git.core.bytecode.AgentClassTransformer;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -24,7 +23,7 @@ public class AgentClassTransformerTest {
         @Override
         public Class<?> loadClass(String name) throws ClassNotFoundException {
             if (name.contains(className)) {
-                byte[] byteBuffer = transformer.instrumentConstructors(name, new byte[0]);
+                byte[] byteBuffer = transformer.instrumentClass(name, new byte[0]);
                 return defineClass(name, byteBuffer, 0, byteBuffer.length);
             }
             return super.loadClass(name);
