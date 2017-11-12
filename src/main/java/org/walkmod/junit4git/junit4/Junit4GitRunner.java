@@ -6,31 +6,31 @@ import org.junit.runners.model.InitializationError;
 
 public class Junit4GitRunner extends BlockJUnit4ClassRunner {
 
-    private static Junit4GitListener listener = null;
+  private static Junit4GitListener listener = null;
 
-    static {
-        try {
-            listener = new Junit4GitListener();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+  static {
+    try {
+      listener = new Junit4GitListener();
+    } catch (Exception e) {
+      e.printStackTrace();
     }
+  }
 
-    public Junit4GitRunner(Class<?> klass) throws InitializationError {
-        super(klass);
-    }
+  public Junit4GitRunner(Class<?> klass) throws InitializationError {
+    super(klass);
+  }
 
-    protected void setUpListener(RunNotifier notifier) {
-        if (listener != null) {
-            notifier.addListener(listener);
-            listener = null;
-        }
+  protected void setUpListener(RunNotifier notifier) {
+    if (listener != null) {
+      notifier.addListener(listener);
+      listener = null;
     }
+  }
 
-    @Override
-    public void run(RunNotifier notifier) {
-        setUpListener(notifier);
-        notifier.fireTestRunStarted(getDescription());
-        super.run(notifier);
-    }
+  @Override
+  public void run(RunNotifier notifier) {
+    setUpListener(notifier);
+    notifier.fireTestRunStarted(getDescription());
+    super.run(notifier);
+  }
 }

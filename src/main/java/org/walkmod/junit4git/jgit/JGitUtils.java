@@ -2,6 +2,7 @@ package org.walkmod.junit4git.jgit;
 
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.ObjectReader;
@@ -32,7 +33,7 @@ public class JGitUtils {
       CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
       newTreeIter.reset(reader, headCommit.getTree());
 
-      List<DiffEntry> diffs= git.diff()
+      List<DiffEntry> diffs = git.diff()
               .setNewTree(newTreeIter)
               .setOldTree(oldTreeIter)
               .call();
@@ -41,5 +42,13 @@ public class JGitUtils {
       }
     }
     return files;
+  }
+
+  public Set<String> getModifiedOrChangedFiles(Git git) throws IOException, GitAPIException {
+    Set<String> changed = new LinkedHashSet<>();
+    Status status = git.status().call();
+    changed.addAll(status.getModified());
+    changed.addAll(status.getChanged());
+    return changed;
   }
 }

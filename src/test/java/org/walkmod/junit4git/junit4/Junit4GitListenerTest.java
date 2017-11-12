@@ -10,23 +10,23 @@ import static org.mockito.Mockito.verify;
 
 public class Junit4GitListenerTest {
 
-    @Test
-    public void when_a_test_starts_then_it_is_notified() {
-        TestsReportClient client = mock(TestsReportClient.class);
+  @Test
+  public void when_a_test_starts_then_it_is_notified() {
+    TestsReportClient client = mock(TestsReportClient.class);
 
-        Junit4GitListener listener = new Junit4GitListener(client);
-        listener.testStarted(Description.createTestDescription("TestClass", "testMethod"));
-        verify(client).sendRequestToClassLoggerAgent(
-                "TestClass", "testMethod", JUnitEventType.START.getName());
-    }
+    Junit4GitListener listener = new Junit4GitListener(client);
+    listener.testStarted(Description.createTestDescription("TestClass", "testMethod"));
+    verify(client).sendRequestToClassLoggerAgent(
+            "TestClass", "testMethod", JUnitEventType.START.getName());
+  }
 
-    @Test
-    public void when_a_test_finishes_then_it_is_notified() {
-        TestsReportClient client = mock(TestsReportClient.class);
+  @Test
+  public void when_a_test_finishes_then_it_is_notified() {
+    TestsReportClient client = mock(TestsReportClient.class);
 
-        Junit4GitListener listener = new Junit4GitListener(client);
-        listener.testFinished(Description.createTestDescription("TestClass", "testMethod"));
-        verify(client).sendRequestToClassLoggerAgent(
-                "TestClass", "testMethod", JUnitEventType.STOP.getName());
-    }
+    Junit4GitListener listener = new Junit4GitListener(client);
+    listener.testFinished(Description.createTestDescription("TestClass", "testMethod"));
+    verify(client).sendRequestToClassLoggerAgent(
+            "TestClass", "testMethod", JUnitEventType.STOP.getName());
+  }
 }

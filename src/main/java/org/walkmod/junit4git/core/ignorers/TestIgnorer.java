@@ -3,7 +3,6 @@ package org.walkmod.junit4git.core.ignorers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Ignore;
 import org.walkmod.junit4git.core.reports.AbstractTestReportStorage;
@@ -13,13 +12,18 @@ import org.walkmod.junit4git.jgit.JGitUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.instrument.Instrumentation;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * It marks with the @Ignore annotations those tests that are not affected by the last changes,
+ * which are calculated using the git status command.
+ */
 public class TestIgnorer {
 
   private final AbstractTestReportStorage updater;
@@ -44,12 +48,10 @@ public class TestIgnorer {
     this.javassist = javassist;
   }
 
-  protected Set<TestMethodReport> getTestsToIgnore(InputStream is) throws IOException, GitAPIException {
-
-    TestMethodReport[] report = gson.fromJson(new InputStreamReader(is), TestMethodReport[].class);
+  protected Set<TestMethodReport> getTestsToIgnore(TestMethodReport[] report) throws IOException, GitAPIException {
     if (report.length > 0) {
-      Set<String> files = getUpdatesFromTheBaseBranch();
-      files.addAll(runGitStatus());
+      Set<String> files = getChangedAndCommittedFiles();
+      files.addAll(getFilesWithUntrackedChanges());
       return testsToIgnore(files, report);
     } else {
       return new HashSet<>();
@@ -70,36 +72,45 @@ public class TestIgnorer {
     return new File(executionDir).getCanonicalFile();
   }
 
-  protected Set<String> getUpdatesFromTheBaseBranch() throws IOException, GitAPIException {
+  /**
+   * Returns the list of committed files whose commits are not yet in origin/master
+   *
+   * @return The list of committed files whose commits are not yet in origin/master
+   * @throws IOException
+   * @throws GitAPIException
+   */
+  protected Set<String> getChangedAndCommittedFiles() throws IOException, GitAPIException {
     try (Git git = open()) {
       return new JGitUtils().getUpdatesFromTheBaseBranch(git, "origin/master",
               git.getRepository().getBranch());
     }
   }
 
-  protected Set<String> runGitStatus() throws IOException, GitAPIException {
-    Set<String> changed = new LinkedHashSet<>();
-    Git git = open();
-    try {
-      Status status = git.status().call();
-      changed.addAll(status.getModified());
-      changed.addAll(status.getChanged());
-    } finally {
-      git.close();
+  /**
+   * Returns the list of existing committed files with pending changes to commit
+   *
+   * @return the list of existing committed files with pending changes to commit
+   * @throws IOException
+   * @throws GitAPIException
+   */
+  protected Set<String> getFilesWithUntrackedChanges() throws IOException, GitAPIException {
+    try (Git git = open()) {
+      return new JGitUtils().getModifiedOrChangedFiles(git);
     }
-    return changed;
   }
 
   private Map<String, List<TestMethodReport>> testsGroupedByClass() throws Exception {
-    return getTestsToIgnore().stream()
+    return getTestsToIgnore(updater.getBaseReport()).stream()
             .collect(Collectors.groupingBy(TestMethodReport::getTestClass));
   }
 
+  /**
+   * Adds the @Ignore annotations to the non affected classes by the last changes
+   *
+   * @param inst instrumentation class to reload the classes that have been modified
+   * @throws Exception in case of modification issues.
+   */
   public void ignoreTests(Instrumentation inst) throws Exception {
     javassist.annotateMethods(Ignore.class, inst, testsGroupedByClass());
-  }
-
-  public Set<TestMethodReport> getTestsToIgnore() throws Exception {
-    return getTestsToIgnore(updater.getBaseReport());
   }
 }

@@ -95,7 +95,7 @@ public class JavassistUtilsTest {
     String field = "x";
 
     CtClass evalClass = pool.makeClass(instrumentedClass);
-    evalClass.addField(CtField.make("public int "+ field+";", evalClass));
+    evalClass.addField(CtField.make("public int " + field + ";", evalClass));
     evalClass.addConstructor(CtNewConstructor.defaultConstructor(evalClass));
 
     javassist.instrumentClass(instrumentedClass, field + " = 2;");

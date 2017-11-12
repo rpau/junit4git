@@ -28,7 +28,7 @@ public class JavassistUtils {
       AnnotationsAttribute currentAttr = (AnnotationsAttribute) info.getAttribute(AnnotationsAttribute.visibleTag);
 
       AnnotationsAttribute methodAttr = Optional.ofNullable(currentAttr).orElse(
-             new AnnotationsAttribute(info.getConstPool(), AnnotationsAttribute.visibleTag));
+              new AnnotationsAttribute(info.getConstPool(), AnnotationsAttribute.visibleTag));
 
       methodAttr.addAnnotation(new Annotation(annotationClass.getName(), constpool));
       method.getMethodInfo().addAttribute(methodAttr);

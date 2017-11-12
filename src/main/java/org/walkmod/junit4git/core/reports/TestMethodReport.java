@@ -2,41 +2,73 @@ package org.walkmod.junit4git.core.reports;
 
 import java.util.Set;
 
+/**
+ * Test method report which represents an executed tests and the loaded classes for that test.
+ */
 public class TestMethodReport {
 
-    private final String test;
-    private final String method;
-    private final Set<String> classes;
+  private final String test;
+  private final String method;
+  private final Set<String> classes;
 
-    public TestMethodReport(String test, String method, Set<String> classes) {
-        this.test = test;
-        this.method = method;
-        this.classes = classes;
-    }
+  public TestMethodReport(String test, String method, Set<String> classes) {
+    this.test = test;
+    this.method = method;
+    this.classes = classes;
+  }
 
-    public String getTestClass() {
-        return test;
-    }
+  /**
+   * Class name that contain tests
+   *
+   * @return class name that contain tests
+   */
+  public String getTestClass() {
+    return test;
+  }
 
-    public String getTestMethod() {
-        return method;
-    }
+  /**
+   * Test method
+   *
+   * @return test method
+   */
+  public String getTestMethod() {
+    return method;
+  }
 
-    public Set<String> getReferencedClasses() {
-        return classes;
-    }
+  /**
+   * Referenced classes by the test that has been loaded any point of its execution.
+   * Classes that belong to third party libraries are excluded.
+   *
+   * @return Referenced classes by the test that has been loaded any point of its execution.
+   */
+  public Set<String> getReferencedClasses() {
+    return classes;
+  }
 
-    public String getTestMethodId() {
-      return getTestClass() + "#" + getTestMethod();
-    }
+  /**
+   * Test method identifier (class name + "#" + method name).
+   * It is not allowed to have test methods with the same name under the same class.
+   *
+   * @return test method id.
+   */
+  public String getTestMethodId() {
+    return getTestClass() + "#" + getTestMethod();
+  }
 
-    public boolean isImpactedBy(Set<String> modifiedFiles) {
-      return modifiedFiles.stream()
-              .anyMatch(file -> !file.endsWith(".class")
-                      &&
-                      (matchesWithFile(test, file) ||
-                              classes.stream().anyMatch(clazz -> matchesWithFile(clazz, file))));
-    }
+  /**
+   * Resolves if any of the referenced classes in the test report (and the test itself) are
+   * impacted / referenced from a list of modified files.
+   *
+   * @param modifiedFiles to consider
+   * @return if the test needs to be re-executed because it is impacted by a change.
+   */
+  public boolean isImpactedBy(Set<String> modifiedFiles) {
+    return modifiedFiles.stream()
+            .anyMatch(file -> !file.endsWith(".class")
+                    &&
+                    (matchesWithFile(getTestClass(), file) ||
+                            getReferencedClasses().stream().anyMatch(clazz -> matchesWithFile(clazz, file))));
+  }
 
   private boolean matchesWithFile(String clazz, String statusFile) {
     String testFilePath = toFilePath(getParentClassName(clazz));
@@ -65,13 +97,13 @@ public class TestMethodReport {
 
 
   @Override
-    public boolean equals(Object o) {
-        if (o instanceof TestMethodReport) {
-            TestMethodReport aux = (TestMethodReport) o;
-            return aux.test.equals(test)
-                    && aux.method.equals(method)
-                    && aux.classes.equals(classes);
-        }
-        return false;
+  public boolean equals(Object o) {
+    if (o instanceof TestMethodReport) {
+      TestMethodReport aux = (TestMethodReport) o;
+      return aux.test.equals(test)
+              && aux.method.equals(method)
+              && aux.classes.equals(classes);
     }
+    return false;
+  }
 }
