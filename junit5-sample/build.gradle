@@ -7,40 +7,9 @@ buildscript {
     }
 }
 
-
-ext.junit4Version        = '4.12'
-ext.junitVintageVersion  = '4.12.1'
-ext.junitPlatformVersion = '1.0.2'
 ext.junitJupiterVersion  = '5.0.1'
-ext.log4jVersion         = '2.9.0'
 
 apply plugin: 'org.junit.platform.gradle.plugin'
-
-compileTestJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-    options.compilerArgs += '-parameters'
-}
-
-
-junitPlatform {
-    // platformVersion '1.0.1'
-    filters {
-        engines {
-            // include 'junit-jupiter', 'junit-vintage'
-            // exclude 'custom-engine'
-        }
-        tags {
-            // include 'fast'
-            exclude 'slow'
-        }
-        // includeClassNamePattern '.*Test'
-    }
-    // configurationParameter 'junit.jupiter.conditions.deactivate', '*'
-    // enableStandardTestTask true
-    // reportsDir file('build/test-results/junit-platform') // this is the default
-    //logManager 'org.apache.logging.log4j.jul.LogManager'
-}
 
 dependencies {
     testCompile project(':junit5git')
