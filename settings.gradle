@@ -1,3 +1,4 @@
 rootProject.name = 'junit4git'
 include 'junit4git'
 include 'junit5git'
+include 'junit5-sample'

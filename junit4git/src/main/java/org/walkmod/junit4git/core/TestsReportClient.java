@@ -35,6 +35,7 @@ public class TestsReportClient {
     this.client = client;
     if (startupServer) {
       startUpAgentServer();
+      System.out.println("Junit4Git started [SUCCESS]");
     }
   }
 
