@@ -20,10 +20,12 @@ These instructions will get you a copy of the project up and running on your loc
 
 - JRE 8
 - Git
-- Maven
+- Maven or Gradle
 - Master as a default base branch
 
-### 1.Configure your Maven build
+### 1. Configure your build
+
+#### 1.1 If you are using Maven
 
 Declare a new test dependency in your `pom.xml`:
 ```xml
@@ -59,12 +61,29 @@ git checkout master
 git add pom.xml
 git commit -m 'junit4git setup'
 ```
+
+#### 1.1 If you are using Gradle
+
+You need to use *Junit 5*. In such case, modify your build.gradle file with the following
+contents:
+
+```
+  testCompile("org.walkmod:junit5git:1.0.3")
+```
+And then:
+
+```bash
+git checkout master
+git add pom.xml
+git commit -m 'junit4git setup'
+```
+
 ### 2. Generate a Test Impact Report
 
 After having configured your build, run your `master` branch tests. 
 
 ```bash
-mvn test
+mvn test -- or gradle check
 .
 .
 [WARNING] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
@@ -99,7 +118,7 @@ of your test methods.
 After generating your test impact report, run the tests again (from the master branch or in a new local branch)
 
 ```bash
-mvn tests
+mvn tests -- or gradle check
 .
 .
 [WARNING] Tests run: 0, Failures: 0, Errors: 0, Skipped: 4
