@@ -17,7 +17,7 @@ public class TestsReportServerTest {
   @Test
   public void test_when_a_start_event_arrives_the_referenced_classes_of_the_previous_test_are_clean() {
     AgentClassTransformer.add("Foo");
-    TestsReportServer server = new TestsReportServer(new GitTestReportStorage("../."));
+    TestsReportServer server = new TestsReportServer(new GitTestReportStorage());
     server.process(new JUnitEvent(JUnitEventType.START.getName(), "FooClass", "test_method"));
     Assert.assertEquals(Collections.EMPTY_SET, AgentClassTransformer.getReferencedClasses());
   }
