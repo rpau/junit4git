@@ -32,7 +32,7 @@ Declare a new test dependency in your `pom.xml`:
   <dependency>
     <groupId>org.walkmod</groupId>
     <artifactId>junit4git</artifactId>
-    <version>1.0.3</version>
+    <version>1.1</version>
     <scope>test</scope>
   </dependency>
 ```
@@ -68,7 +68,7 @@ You need to use *Junit 5*. In such case, modify your build.gradle file with the 
 contents:
 
 ```
-  testCompile("org.walkmod:junit5git:1.0.3")
+  testCompile("org.walkmod:junit5git:1.1")
 ```
 And then:
 
