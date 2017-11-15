@@ -13,6 +13,7 @@ import java.util.Map;
 public class GitRepo {
 
   private final Path path;
+  private String branch = "master";
   private final Map<String, String> committedFiles;
   private final Map<String, String> modifiedFiles;
 
@@ -30,14 +31,12 @@ public class GitRepo {
     this.modifiedFiles = new HashMap<>();
   }
 
-  protected GitRepo(GitRepo repo) {
-    this.path = repo.path;
-    this.committedFiles = repo.committedFiles;
-    this.modifiedFiles = repo.modifiedFiles;
-  }
-
   protected void setNotes(String notes) {
     this.notes = notes;
+  }
+
+  protected void setBranch(String branch) {
+    this.branch = branch;
   }
 
   public Path getPath() {
@@ -76,11 +75,18 @@ public class GitRepo {
   protected void init() {
     if (path != null) {
       try (Git parentGit = GitUtils.buildGitRepoForTest(path.toFile())) {
+
+
+        if (!branch.equals("master")) {
+          parentGit.checkout().setCreateBranch(true).setName(branch).call();
+        }
+
         committedFiles.keySet().stream().forEach(file -> {
               writeFile(file, committedFiles.get(file));
               addFile(parentGit, file);
           }
         );
+
         parentGit.commit().setMessage("init commit").call();
 
         modifiedFiles.keySet().stream().forEach(file -> {

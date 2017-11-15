@@ -79,6 +79,21 @@ public class GitTestReportStorageTest {
   }
 
   @Test
+  public void when_the_repo_is_clean_but_not_in_master_then_it_generates_a_dummy_writer() throws Exception {
+    GitRepo repo = GitRepoBuilder.builder()
+            .checkout("something")
+            .committing("test.txt", "foo")
+            .build();
+
+    GitTestReportStorage updater = new GitTestReportStorage(repo.getPath().toFile().getCanonicalPath());
+
+    Assert.assertEquals(StringWriter.class.getName(),
+            updater.buildWriter().getClass().getName());
+
+    repo.delete();
+  }
+
+  @Test
   public void when_the_repo_has_new_files_then_it_generates_a_dummy_writer() throws Exception {
 
     GitRepo repo = GitRepoBuilder.builder().modifying("foo.txt", "hello").build();

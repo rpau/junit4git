@@ -173,6 +173,24 @@ public class TestIgnorerTest {
   }
 
   @Test
+  public void when_there_are_changes_in_new_branch_the_updated_files_are_detected() throws Exception {
+    GitRepo parentRepo = GitRepoBuilder.builder().build();
+
+    GitRepo clonedRepo = GitRepoBuilder.clone(parentRepo)
+            .checkout("my-branch")
+            .committing("test.txt", "test")
+            .build();
+
+    TestIgnorer ignorer = new TestIgnorer(clonedRepo.getPath(),
+            mock(AbstractTestReportStorage.class), mock(JavassistUtils.class));
+
+    Assert.assertEquals(new HashSet<>(Arrays.asList("test.txt")), ignorer.getChangedAndCommittedFiles());
+
+    parentRepo.delete();
+    clonedRepo.delete();
+  }
+
+  @Test
   public void when_there_are_untracked_changes_the_updated_files_are_detected() throws Exception {
     GitRepo parentRepo = GitRepoBuilder.builder()
             .committing("test.txt", "committed text")

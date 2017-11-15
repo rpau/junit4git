@@ -41,6 +41,11 @@ public class GitRepoBuilder {
     return this;
   }
 
+  public GitRepoBuilder checkout(String branch) {
+    repo.setBranch(branch);
+    return this;
+  }
+
   public GitRepo build() {
      repo.init();
      return repo;
