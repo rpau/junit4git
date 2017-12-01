@@ -71,7 +71,17 @@ public class TestIgnorer {
   }
 
   protected Git open() throws IOException, GitAPIException {
-    return Git.open(executionDir());
+    File file = executionDir();
+    boolean isGit = new File(file, ".git").exists();
+    while(!isGit && file != null) {
+      file = file.getParentFile();
+      isGit = new File(file, ".git").exists();
+    }
+    if (isGit) {
+      return Git.open(file);
+    } else {
+      throw new IOException("The execution dir does not belong to a Git repository");
+    }
   }
 
   protected File executionDir() throws IOException {
