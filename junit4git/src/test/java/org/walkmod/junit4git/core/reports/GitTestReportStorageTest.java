@@ -2,6 +2,8 @@ package org.walkmod.junit4git.core.reports;
 
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.LsRemoteCommand;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.walkmod.junit4git.jgit.GitRepo;
@@ -9,6 +11,9 @@ import org.walkmod.junit4git.jgit.GitRepoBuilder;
 
 import java.io.StringWriter;
 import java.util.Collections;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class GitTestReportStorageTest {
 
@@ -139,6 +144,17 @@ public class GitTestReportStorageTest {
     Assert.assertArrayEquals(new TestMethodReport[] {report1, report2}, updater.getBaseReport());
 
     repo.delete();
+  }
+
+  @Test
+  public void when_there_is_no_connection_ignores_to_fetch_notes() throws Exception {
+    GitTestReportStorage updater = new GitTestReportStorage();
+    Git git = mock(Git.class);
+    LsRemoteCommand command = mock(LsRemoteCommand.class);
+
+    when(git.lsRemote()).thenReturn(command);
+    when(command.call()).thenThrow(new TransportException("disconnected"));
+    Assert.assertFalse(updater.areNotesInRemote(git));
   }
 
 }
