@@ -74,7 +74,9 @@ public class AgentClassTransformer implements ClassFileTransformer {
 
     if (className != null && !belongsToAJarFile(protectionDomain)) {
       String normalizedName = normalizeName(className);
-      return instrumentClass(normalizedName, classfileBuffer);
+      if (!normalizedName.contains("$MockitoMock$")) {
+        return instrumentClass(normalizedName, classfileBuffer);
+      }
     }
 
     return classfileBuffer;

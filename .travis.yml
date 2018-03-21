@@ -1,6 +1,9 @@
 language: java
 jdk:
   - oraclejdk8
+branches:
+  only:
+  - master
 script:
   - ./gradlew check
 after_success:

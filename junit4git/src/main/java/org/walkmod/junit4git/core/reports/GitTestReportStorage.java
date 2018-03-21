@@ -1,16 +1,21 @@
 package org.walkmod.junit4git.core.reports;
 
+import com.jcraft.jsch.Session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.notes.Note;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.JschConfigSessionFactory;
+import org.eclipse.jgit.transport.OpenSshConfig;
 import org.eclipse.jgit.transport.RefSpec;
+import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.util.StringUtils;
 
 import java.io.*;
@@ -26,6 +31,14 @@ public class GitTestReportStorage extends AbstractTestReportStorage {
   private final String executionDir;
 
   private static Log log = LogFactory.getLog(GitTestReportStorage.class);
+
+  static {
+    SshSessionFactory.setInstance(new JschConfigSessionFactory() {
+      public void configure(OpenSshConfig.Host hc, Session session) {
+        session.setConfig("StrictHostKeyChecking", "no");
+      }
+    });
+  }
 
   public GitTestReportStorage() {
     try {
@@ -73,11 +86,15 @@ public class GitTestReportStorage extends AbstractTestReportStorage {
     return ref;
   }
 
-  protected boolean areNotesInRemote(Git git) throws IOException, GitAPIException {
-    return git.lsRemote().call().stream()
-            .filter(remoteRef -> remoteRef.getName().equals(GIT_NOTES_REF))
-            .findFirst()
-            .isPresent();
+  protected boolean areNotesInRemote(Git git) throws GitAPIException {
+    try {
+      return git.lsRemote().call().stream()
+              .filter(remoteRef -> remoteRef.getName().equals(GIT_NOTES_REF))
+              .findFirst()
+              .isPresent();
+    } catch (TransportException e) {
+      return false;
+    }
   }
 
   private void removeLastNote(Git git) throws IOException, GitAPIException {
