@@ -54,7 +54,7 @@ public class AgentClassTransformerTest {
             Dummy.class,
             this.getClass().getProtectionDomain(), new byte[0]);
 
-    verify(javassist).instrumentClass("org.walkmod.junit4git.core.Dummy",
+    verify(javassist).instrumentClassWithStaticStmt("org.walkmod.junit4git.core.Dummy",
             AgentClassTransformer.class.getName() + ".add(\"" +  Dummy.class.getName() + "\");");
   }
 }
