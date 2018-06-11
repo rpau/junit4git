@@ -66,14 +66,28 @@ public class JavassistUtils {
     }
   }
 
-  public byte[] instrumentClass(String className, String instrumentationInstruction)
+  public byte[] instrumentClassWithStaticStmt(String className, String instrumentationInstruction)
           throws CannotCompileException, NotFoundException, IOException {
     ClassPool pool = ClassPool.getDefault();
     CtClass clazz = pool.get(className);
     clazz.defrost();
+
     for (CtConstructor ctConstructor : clazz.getConstructors()) {
       ctConstructor.insertAfter(instrumentationInstruction);
     }
+
+    CtMethod[] methods = clazz.getMethods();
+    if (methods != null) {
+      for (CtMethod ctMethod : clazz.getMethods()) {
+        if (Modifier.isStatic(ctMethod.getModifiers())) {
+          ctMethod.insertAfter(instrumentationInstruction, true);
+        }
+      }
+    }
+
+    CtConstructor constructor = clazz.makeClassInitializer();
+    constructor.insertBefore(instrumentationInstruction);
+
     clazz.defrost();
     return clazz.toBytecode();
   }

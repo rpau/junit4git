@@ -92,7 +92,7 @@ public class AgentClassTransformer implements ClassFileTransformer {
    */
   protected byte[] instrumentClass(String name, byte[] classfileBuffer) {
     try {
-      return javaassist.instrumentClass(name,
+      return javaassist.instrumentClassWithStaticStmt(name,
               AgentClassTransformer.class.getName()
                       + ".add(\"" + name + "\");");
     } catch (Throwable e) {

@@ -95,14 +95,56 @@ public class JavassistUtilsTest {
     String field = "x";
 
     CtClass evalClass = pool.makeClass(instrumentedClass);
-    evalClass.addField(CtField.make("public int " + field + ";", evalClass));
+    evalClass.addField(CtField.make("public static int " + field + ";", evalClass));
     evalClass.addConstructor(CtNewConstructor.defaultConstructor(evalClass));
 
-    javassist.instrumentClass(instrumentedClass, field + " = 2;");
+    javassist.instrumentClassWithStaticStmt(instrumentedClass, field + " = 2;");
 
     Class clazz = pool.get(instrumentedClass).toClass();
     Object o = clazz.newInstance();
     Assert.assertEquals(2, o.getClass().getField(field).get(o));
+  }
+
+  @Test
+  public void it_instruments_static_constructors() throws Exception {
+
+    JavassistUtils javassist = new JavassistUtils();
+    ClassPool pool = ClassPool.getDefault();
+
+    String instrumentedClass = "InstrumentedClassWithoutMethods";
+    String field = "x";
+
+    CtClass evalClass = pool.makeClass(instrumentedClass);
+    evalClass.addField(CtField.make("public static int " + field + ";", evalClass));
+
+    javassist.instrumentClassWithStaticStmt(instrumentedClass, field + " = 2;");
+
+    Class clazz = pool.get(instrumentedClass).toClass();
+    Assert.assertEquals(2, clazz.getField(field).get(null));
+
+  }
+
+  @Test
+  public void it_instruments_static_methods() throws Exception {
+    JavassistUtils javassist = new JavassistUtils();
+    ClassPool pool = ClassPool.getDefault();
+
+    String instrumentedClass = "InstrumentedClassWithStaticMethods";
+    String field = "x";
+
+    CtClass evalClass = pool.makeClass(instrumentedClass);
+    evalClass.addField(CtField.make("public static int " + field + ";", evalClass));
+
+    CtMethod method = CtNewMethod.make(
+            "public static int xValue() { return 2; }",
+            evalClass);
+    evalClass.addMethod(method);
+
+    javassist.instrumentClassWithStaticStmt(instrumentedClass, field + " = 2;");
+
+    Class clazz = pool.get(instrumentedClass).toClass();
+    clazz.getMethod("xValue").invoke(null);
+    Assert.assertEquals(2, clazz.getField(field).get(null));
   }
 
 }
