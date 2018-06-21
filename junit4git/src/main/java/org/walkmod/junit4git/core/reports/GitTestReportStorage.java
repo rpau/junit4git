@@ -4,6 +4,7 @@ import com.jcraft.jsch.Session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.ObjectId;
@@ -20,6 +21,7 @@ import org.eclipse.jgit.util.StringUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Optional;
 
 public class GitTestReportStorage extends AbstractTestReportStorage {
@@ -171,6 +173,7 @@ public class GitTestReportStorage extends AbstractTestReportStorage {
         log.info("Tests Report:[READY]. Master branch is clean");
         return new GitNotesWriter(this);
       } else {
+
         log.info("Tests Report [OMITTED]. If you are in master branch, " +
                 "check that there are not pending changes to commit");
         return new StringWriter();
@@ -190,12 +193,22 @@ public class GitTestReportStorage extends AbstractTestReportStorage {
         RevCommit baseCommit = walk.parseCommit(getBaseObjectId(git));
         RevCommit headCommit = walk.parseCommit(getHead(git).getObjectId());
 
-        log.info(String.format("origin/master Commit: [%s], branch: [%s]",
+        log.info(String.format("origin/master sha: [%s], head: [%s]",
                 baseCommit.getName(), headCommit.getName()));
         return baseCommit.equals(headCommit) && git.status().call().isClean();
       } else {
         // there is no origin
-        return git.status().call().isClean();
+        Status status = git.status().call();
+        boolean isClean = status.isClean();
+        if (!isClean) {
+          log.info("Untracked Folders: " + Arrays.toString(status.getUntrackedFolders().toArray()));
+          log.info("Untracked Files: " + Arrays.toString(status.getUntracked().toArray()));
+          log.info("Changed Files: " + Arrays.toString(status.getChanged().toArray()));
+          log.info("Added Files: " + Arrays.toString(status.getAdded().toArray()));
+          log.info("Removed Files: " + Arrays.toString(status.getRemoved().toArray()));
+          log.info("Uncommitted Files: " + Arrays.toString(status.getUncommittedChanges().toArray()));
+        }
+        return isClean;
       }
     }
     return false;
