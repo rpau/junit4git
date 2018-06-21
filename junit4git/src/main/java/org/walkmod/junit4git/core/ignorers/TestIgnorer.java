@@ -33,8 +33,6 @@ public class TestIgnorer {
 
   private final JavassistUtils javassist;
 
-  private Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
   public TestIgnorer(AbstractTestReportStorage storage) {
     this(".", storage);
   }
@@ -58,6 +56,7 @@ public class TestIgnorer {
     if (report != null && report.length > 0) {
       Set<String> files = getChangedAndCommittedFiles();
       files.addAll(getFilesWithUntrackedChanges());
+
       return testsToIgnore(files, report);
     } else {
       return new HashSet<>();
