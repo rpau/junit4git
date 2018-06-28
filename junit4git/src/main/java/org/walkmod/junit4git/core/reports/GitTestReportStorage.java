@@ -185,7 +185,9 @@ public class GitTestReportStorage extends AbstractTestReportStorage {
   }
 
   protected boolean isClean(Git git) throws GitAPIException, IOException {
-    if (git.getRepository().getBranch().equals(BASE_BRANCH)) {
+    String branch = git.getRepository().getBranch();
+
+    if (branch.equals(BASE_BRANCH)) {
 
       Optional<Ref> baseBranch = getOriginHead(git);
       if (baseBranch.isPresent()) {
@@ -210,6 +212,8 @@ public class GitTestReportStorage extends AbstractTestReportStorage {
         }
         return isClean;
       }
+    } else {
+      log.info("The analyzed branch " + branch + " is not "+ BASE_BRANCH);
     }
     return false;
   }
