@@ -130,6 +130,10 @@ public class GitTestReportStorage extends AbstractTestReportStorage {
     return git.getRepository().findRef(git.getRepository().getBranch());
   }
 
+  private Ref getLocalBaseBranchSha(Git git) throws IOException {
+    return git.getRepository().findRef(BASE_BRANCH);
+  }
+
   protected Git open() throws IOException {
     return Git.open(new File(executionDir).getCanonicalFile());
   }
@@ -187,17 +191,23 @@ public class GitTestReportStorage extends AbstractTestReportStorage {
   protected boolean isClean(Git git) throws GitAPIException, IOException {
     String branch = git.getRepository().getBranch();
 
-    if (branch.equals(BASE_BRANCH)) {
+    RevWalk walk = new RevWalk(git.getRepository());
+    Ref localBaseBranch = getLocalBaseBranchSha(git);
+    RevCommit baseBranchCommit = walk.parseCommit(localBaseBranch.getObjectId());
+
+    boolean isDetachedCommit = (localBaseBranch.getName().equals("refs/heads/" + BASE_BRANCH)
+            && baseBranchCommit.getName().equals(branch));
+
+    if (branch.equals(BASE_BRANCH) || isDetachedCommit) {
 
       Optional<Ref> baseBranch = getOriginHead(git);
       if (baseBranch.isPresent()) {
-        RevWalk walk = new RevWalk(git.getRepository());
-        RevCommit baseCommit = walk.parseCommit(getBaseObjectId(git));
-        RevCommit headCommit = walk.parseCommit(getHead(git).getObjectId());
 
+
+        RevCommit baseCommit = walk.parseCommit(getBaseObjectId(git));
         log.info(String.format("origin/master sha: [%s], head: [%s]",
-                baseCommit.getName(), headCommit.getName()));
-        return baseCommit.equals(headCommit) && git.status().call().isClean();
+                baseCommit.getName(), baseBranchCommit.getName()));
+        return baseCommit.equals(baseBranchCommit) && git.status().call().isClean();
       } else {
         // there is no origin
         Status status = git.status().call();
@@ -217,6 +227,7 @@ public class GitTestReportStorage extends AbstractTestReportStorage {
     }
     return false;
   }
+
 
 
   public static class GitNotesWriter extends StringWriter {
