@@ -4,11 +4,13 @@ package org.walkmod.junit4git.core.reports;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.LsRemoteCommand;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.lib.Ref;
 import org.junit.Assert;
 import org.junit.Test;
 import org.walkmod.junit4git.jgit.GitRepo;
 import org.walkmod.junit4git.jgit.GitRepoBuilder;
 
+import java.io.File;
 import java.io.StringWriter;
 import java.util.Collections;
 
@@ -155,6 +157,26 @@ public class GitTestReportStorageTest {
     when(git.lsRemote()).thenReturn(command);
     when(command.call()).thenThrow(new TransportException("disconnected"));
     Assert.assertFalse(updater.areNotesInRemote(git));
+  }
+
+  @Test
+  public void when_the_checkout_is_using_a_detached_commit_it_is_clean() throws Exception {
+
+    GitRepo repo = GitRepoBuilder.builder()
+            .committing("FooTest.java", "public FooTest { @org.junit.Test public void test() {} } ")
+            .build();
+
+    Git git = Git.open(new File(repo.getPath().toFile().getCanonicalPath()));
+
+    Ref ref = git.getRepository().findRef(git.getRepository().getBranch());
+    git.checkout().setName(ref.getObjectId().getName()).call();
+
+    GitTestReportStorage updater = new GitTestReportStorage();
+    Boolean clean = updater.isClean(git);
+
+    repo.delete();
+    Assert.assertTrue(clean);
+
   }
 
 }
