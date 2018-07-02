@@ -103,6 +103,10 @@ public class TestsReportServer extends NanoHTTPD {
   public static void agentmain(String agentArgs, Instrumentation inst) throws Exception {
     TestsReportServer agent = new TestsReportServer();
     agent.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-    agent.ignoreTests(inst);
+    try {
+      agent.ignoreTests(inst);
+    } catch (Exception e) {
+      log.error("Error ignoring tests", e);
+    }
   }
 }

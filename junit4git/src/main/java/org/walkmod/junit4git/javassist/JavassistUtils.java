@@ -6,18 +6,21 @@ import javassist.bytecode.ClassFile;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
 import javassist.bytecode.annotation.Annotation;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.walkmod.junit4git.core.reports.TestMethodReport;
 
 import java.io.IOException;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
-import java.lang.instrument.UnmodifiableClassException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public class JavassistUtils {
+
+  private static Log log = LogFactory.getLog(JavassistUtils.class);
 
   public void annotateMethod(Class<?> annotationClass,
                              String md, CtClass clazz, ConstPool constpool) {
@@ -40,14 +43,12 @@ public class JavassistUtils {
   }
 
   public void annotateMethods(Class<?> annotationClass, Instrumentation inst, Map<String,
-          List<TestMethodReport>> testsToMap)
-          throws IOException, CannotCompileException, UnmodifiableClassException {
+          List<TestMethodReport>> testsToMap) {
     annotateMethods(annotationClass, inst, ClassPool.getDefault(), testsToMap);
   }
 
   public void annotateMethods(Class<?> annotationClass, Instrumentation inst,
-                              ClassPool pool, Map<String, List<TestMethodReport>> testsToMap)
-          throws IOException, CannotCompileException, UnmodifiableClassException {
+                              ClassPool pool, Map<String, List<TestMethodReport>> testsToMap) {
 
     Iterator<String> it = testsToMap.keySet().iterator();
     while (it.hasNext()) {
@@ -59,9 +60,15 @@ public class JavassistUtils {
         testsToMap.get(className).stream()
                 .map(TestMethodReport::getTestMethod)
                 .forEach(md -> annotateMethod(annotationClass, md, clazz, constpool));
+        if (clazz.isFrozen()) {
+          clazz.defrost();
+          clazz.detach();
+        }
         inst.redefineClasses(new ClassDefinition(Class.forName(className), clazz.toBytecode()));
       } catch (NotFoundException | ClassNotFoundException e) {
         //the class has been removed
+      } catch (Throwable e) {
+        log.error("Error ignoring the test class " + className, e);
       }
     }
   }
@@ -70,7 +77,11 @@ public class JavassistUtils {
           throws CannotCompileException, NotFoundException, IOException {
     ClassPool pool = ClassPool.getDefault();
     CtClass clazz = pool.get(className);
-    clazz.defrost();
+
+    if (clazz.isFrozen()) {
+      clazz.defrost();
+      clazz.detach();
+    }
 
     for (CtConstructor ctConstructor : clazz.getConstructors()) {
       ctConstructor.insertAfter(instrumentationInstruction);
@@ -88,7 +99,6 @@ public class JavassistUtils {
     CtConstructor constructor = clazz.makeClassInitializer();
     constructor.insertBefore(instrumentationInstruction);
 
-    clazz.defrost();
     return clazz.toBytecode();
   }
 }
