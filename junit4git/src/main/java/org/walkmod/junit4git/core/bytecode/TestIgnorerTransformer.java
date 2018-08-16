@@ -24,7 +24,6 @@ public class TestIgnorerTransformer implements ClassFileTransformer {
   public TestIgnorerTransformer(TestIgnorer testIgnorer) throws Exception {
     this.testIgnorer = testIgnorer;
     testsToMap = testIgnorer.testsGroupedByClass();
-    log.info("Last Test Impact Analysis: " + testsToMap.size() + " tests");
   }
 
   @Override

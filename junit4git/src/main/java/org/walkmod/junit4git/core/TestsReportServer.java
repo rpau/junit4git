@@ -44,26 +44,33 @@ public class TestsReportServer extends NanoHTTPD {
 
   private final ReportStatus status;
 
+  private final boolean fromRunner;
+
   public TestsReportServer() throws Exception {
-    this(new GitTestReportStorage(), PORT);
+    this(false);
   }
 
-  public TestsReportServer(AbstractTestReportStorage storage, int port) throws Exception {
+  public TestsReportServer(boolean fromRunner) throws Exception {
+    this(new GitTestReportStorage(), fromRunner, PORT);
+  }
+
+  public TestsReportServer(AbstractTestReportStorage storage, boolean fromRunner, int port) throws Exception {
     this(storage, new AgentClassTransformer(),
-            new TestIgnorerTransformer(new TestIgnorer(storage)), port);
+            new TestIgnorerTransformer(new TestIgnorer(storage)), fromRunner, port);
   }
 
-  public TestsReportServer(AbstractTestReportStorage storage)throws Exception {
-    this(storage, new AgentClassTransformer(), new TestIgnorerTransformer(new TestIgnorer(storage)), PORT);
+  public TestsReportServer(AbstractTestReportStorage storage) throws Exception {
+    this(storage, new AgentClassTransformer(), new TestIgnorerTransformer(new TestIgnorer(storage)), false, PORT);
   }
 
   public TestsReportServer(AbstractTestReportStorage storage, AgentClassTransformer usageTransformer,
-                           TestIgnorerTransformer ignorerTransformer, int port) {
+                           TestIgnorerTransformer ignorerTransformer, boolean fromRunner, int port) {
     super(port);
     this.storage = storage;
     this.usageTransformer = usageTransformer;
     status = storage.prepare();
     this.ignorerTransformer = ignorerTransformer;
+    this.fromRunner = fromRunner;
   }
 
 
@@ -87,7 +94,11 @@ public class TestsReportServer extends NanoHTTPD {
     if (status.equals(ReportStatus.CLEAN)) {
       inst.addTransformer(usageTransformer);
     } else {
-      inst.addTransformer(ignorerTransformer);
+      if (!fromRunner) {
+        inst.addTransformer(ignorerTransformer);
+      } else {
+        log.debug("Skipping test ignorer because Junit4Git agent is already running");
+      }
     }
   }
 
@@ -118,7 +129,8 @@ public class TestsReportServer extends NanoHTTPD {
    */
   public static void agentmain(String agentArgs, Instrumentation inst) throws Exception {
     try {
-      TestsReportServer agent = new TestsReportServer();
+
+      TestsReportServer agent = new TestsReportServer(agentArgs.contains("--fromRunner"));
       agent.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
       agent.transformClasses(inst);
     } catch (Exception e) {

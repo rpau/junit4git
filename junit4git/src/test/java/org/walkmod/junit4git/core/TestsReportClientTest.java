@@ -24,7 +24,7 @@ public class TestsReportClientTest {
     OkHttpClient http = mock(OkHttpClient.class);
     when(http.newCall(any())).thenReturn(mock(Call.class));
 
-    TestsReportClient client = new TestsReportClient(http, false);
+    TestsReportClient client = new TestsReportClient(http, false, false);
     ArgumentCaptor<Request> argumentCaptor = ArgumentCaptor.forClass(Request.class);
     client.sendRequestToClassLoggerAgent("FooClass", "bar",
             JUnitEventType.START.getName());
