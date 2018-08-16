@@ -15,7 +15,7 @@ import static org.mockito.Mockito.verify;
 public class TestsReportServerTest {
 
   @Test
-  public void test_when_a_start_event_arrives_the_referenced_classes_of_the_previous_test_are_clean() {
+  public void test_when_a_start_event_arrives_the_referenced_classes_of_the_previous_test_are_clean() throws Exception {
     AgentClassTransformer.add("Foo");
     TestsReportServer server = new TestsReportServer(new GitTestReportStorage());
     server.process(new JUnitEvent(JUnitEventType.START.getName(), "FooClass", "test_method"));
@@ -23,7 +23,7 @@ public class TestsReportServerTest {
   }
 
   @Test
-  public void test_when_a_stop_event_arrives_the_test_is_stored() {
+  public void test_when_a_stop_event_arrives_the_test_is_stored() throws Exception {
     AbstractTestReportStorage storage = mock(AbstractTestReportStorage.class);
     TestsReportServer server = new TestsReportServer(storage);
     server.process(new JUnitEvent(JUnitEventType.STOP.getName(), "FooClass", "test_method"));

@@ -5,6 +5,7 @@ import fi.iki.elonen.NanoHTTPD;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.walkmod.junit4git.core.bytecode.AgentClassTransformer;
+import org.walkmod.junit4git.core.bytecode.TestIgnorerTransformer;
 import org.walkmod.junit4git.core.ignorers.TestIgnorer;
 import org.walkmod.junit4git.core.reports.AbstractTestReportStorage;
 import org.walkmod.junit4git.core.reports.GitTestReportStorage;
@@ -28,7 +29,11 @@ public class TestsReportServer extends NanoHTTPD {
 
   private final AbstractTestReportStorage storage;
 
-  private final AgentClassTransformer transformer;
+  /*Transformer to report which classes are used from which tests*/
+  private final AgentClassTransformer usageTransformer;
+
+  /*Transformer to ignore tests that are not related with the last changes*/
+  private final TestIgnorerTransformer ignorerTransformer;
 
   private static Gson gson = new Gson();
 
@@ -36,23 +41,26 @@ public class TestsReportServer extends NanoHTTPD {
 
   private static int PORT = 9000;
 
-  public TestsReportServer() {
-    this(PORT);
+  public TestsReportServer() throws Exception {
+    this(new GitTestReportStorage(), PORT);
   }
 
-  public TestsReportServer(int port) {
-    this(new GitTestReportStorage(), new AgentClassTransformer(), port);
+  public TestsReportServer(AbstractTestReportStorage storage, int port) throws Exception {
+    this(storage, new AgentClassTransformer(),
+            new TestIgnorerTransformer(new TestIgnorer(storage)), port);
   }
 
-  public TestsReportServer(AbstractTestReportStorage storage) {
-    this(storage, new AgentClassTransformer(), PORT);
+  public TestsReportServer(AbstractTestReportStorage storage)throws Exception {
+    this(storage, new AgentClassTransformer(), new TestIgnorerTransformer(new TestIgnorer(storage)), PORT);
   }
 
-  public TestsReportServer(AbstractTestReportStorage storage, AgentClassTransformer transformer, int port) {
+  public TestsReportServer(AbstractTestReportStorage storage, AgentClassTransformer usageTransformer,
+                           TestIgnorerTransformer ignorerTransformer, int port) {
     super(port);
     this.storage = storage;
-    this.transformer = transformer;
+    this.usageTransformer = usageTransformer;
     storage.prepare();
+    this.ignorerTransformer = ignorerTransformer;
   }
 
 
@@ -73,8 +81,8 @@ public class TestsReportServer extends NanoHTTPD {
    * @throws Exception
    */
   protected void ignoreTests(Instrumentation inst) throws Exception {
-    inst.addTransformer(transformer);
-    new TestIgnorer(storage).ignoreTests(inst);
+    inst.addTransformer(usageTransformer);
+    inst.addTransformer(ignorerTransformer);
   }
 
   @Override
@@ -101,12 +109,12 @@ public class TestsReportServer extends NanoHTTPD {
    * @throws Exception
    */
   public static void agentmain(String agentArgs, Instrumentation inst) throws Exception {
-    TestsReportServer agent = new TestsReportServer();
-    agent.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
     try {
+      TestsReportServer agent = new TestsReportServer();
+      agent.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
       agent.ignoreTests(inst);
     } catch (Exception e) {
-      log.error("Error ignoring tests", e);
+      log.error("Error starting the embedded Junit4Git agent", e);
     }
   }
 }
