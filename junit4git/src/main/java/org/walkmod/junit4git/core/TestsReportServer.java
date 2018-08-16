@@ -9,6 +9,7 @@ import org.walkmod.junit4git.core.bytecode.TestIgnorerTransformer;
 import org.walkmod.junit4git.core.ignorers.TestIgnorer;
 import org.walkmod.junit4git.core.reports.AbstractTestReportStorage;
 import org.walkmod.junit4git.core.reports.GitTestReportStorage;
+import org.walkmod.junit4git.core.reports.ReportStatus;
 import org.walkmod.junit4git.core.reports.TestMethodReport;
 
 import java.lang.instrument.Instrumentation;
@@ -41,6 +42,8 @@ public class TestsReportServer extends NanoHTTPD {
 
   private static int PORT = 9000;
 
+  private final ReportStatus status;
+
   public TestsReportServer() throws Exception {
     this(new GitTestReportStorage(), PORT);
   }
@@ -59,7 +62,7 @@ public class TestsReportServer extends NanoHTTPD {
     super(port);
     this.storage = storage;
     this.usageTransformer = usageTransformer;
-    storage.prepare();
+    status = storage.prepare();
     this.ignorerTransformer = ignorerTransformer;
   }
 
@@ -80,9 +83,12 @@ public class TestsReportServer extends NanoHTTPD {
    * @param inst object used to reload modified classes with the @Ignore annotation
    * @throws Exception
    */
-  protected void ignoreTests(Instrumentation inst) throws Exception {
-    inst.addTransformer(usageTransformer);
-    inst.addTransformer(ignorerTransformer);
+  protected void transformClasses(Instrumentation inst) throws Exception {
+    if (status.equals(ReportStatus.CLEAN)) {
+      inst.addTransformer(usageTransformer);
+    } else {
+      inst.addTransformer(ignorerTransformer);
+    }
   }
 
   @Override
@@ -93,12 +99,14 @@ public class TestsReportServer extends NanoHTTPD {
   }
 
   protected void process(JUnitEvent event) {
-    Set<String> referencedClasses = AgentClassTransformer.getReferencedClasses();
-    if (JUnitEventType.START.getName().equals(event.getEventType())) {
-      AgentClassTransformer.cleanUp();
-    } else {
-      storage.appendTestReport(new TestMethodReport(
-              event.getTestClass(), event.getTestMethod(), referencedClasses));
+    if (status.equals(ReportStatus.CLEAN)) {
+      Set<String> referencedClasses = AgentClassTransformer.getReferencedClasses();
+      if (JUnitEventType.START.getName().equals(event.getEventType())) {
+        AgentClassTransformer.cleanUp();
+      } else {
+        storage.appendTestReport(new TestMethodReport(
+                event.getTestClass(), event.getTestMethod(), referencedClasses));
+      }
     }
   }
 
@@ -112,7 +120,7 @@ public class TestsReportServer extends NanoHTTPD {
     try {
       TestsReportServer agent = new TestsReportServer();
       agent.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-      agent.ignoreTests(inst);
+      agent.transformClasses(inst);
     } catch (Exception e) {
       log.error("Error starting the embedded Junit4Git agent", e);
     }

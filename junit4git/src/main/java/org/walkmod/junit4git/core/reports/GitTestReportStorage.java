@@ -64,13 +64,17 @@ public class GitTestReportStorage extends AbstractTestReportStorage {
     this.executionDir = executionDir;
   }
 
-  public void prepare() {
+  public ReportStatus prepare() {
     try (Git git = open()) {
       Ref ref = fetchNotesRef(git);
       if (ref == null) {
         createGitNotesRef(git);
+        return ReportStatus.CLEAN;
       } else if (isClean(git)) {
         removeLastNote(git);
+        return ReportStatus.CLEAN;
+      } else {
+        return ReportStatus.DIRTY;
       }
     } catch (Exception e) {
       throw new RuntimeException("Error removing the existing Git notes in " + GIT_NOTES_REF, e);
