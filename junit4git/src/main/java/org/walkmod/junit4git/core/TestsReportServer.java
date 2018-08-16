@@ -5,9 +5,11 @@ import fi.iki.elonen.NanoHTTPD;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.walkmod.junit4git.core.bytecode.AgentClassTransformer;
+import org.walkmod.junit4git.core.bytecode.TestIgnorerTransformer;
 import org.walkmod.junit4git.core.ignorers.TestIgnorer;
 import org.walkmod.junit4git.core.reports.AbstractTestReportStorage;
 import org.walkmod.junit4git.core.reports.GitTestReportStorage;
+import org.walkmod.junit4git.core.reports.ReportStatus;
 import org.walkmod.junit4git.core.reports.TestMethodReport;
 
 import java.lang.instrument.Instrumentation;
@@ -28,7 +30,11 @@ public class TestsReportServer extends NanoHTTPD {
 
   private final AbstractTestReportStorage storage;
 
-  private final AgentClassTransformer transformer;
+  /*Transformer to report which classes are used from which tests*/
+  private final AgentClassTransformer usageTransformer;
+
+  /*Transformer to ignore tests that are not related with the last changes*/
+  private final TestIgnorerTransformer ignorerTransformer;
 
   private static Gson gson = new Gson();
 
@@ -36,23 +42,35 @@ public class TestsReportServer extends NanoHTTPD {
 
   private static int PORT = 9000;
 
-  public TestsReportServer() {
-    this(PORT);
+  private final ReportStatus status;
+
+  private final boolean fromRunner;
+
+  public TestsReportServer() throws Exception {
+    this(false);
   }
 
-  public TestsReportServer(int port) {
-    this(new GitTestReportStorage(), new AgentClassTransformer(), port);
+  public TestsReportServer(boolean fromRunner) throws Exception {
+    this(new GitTestReportStorage(), fromRunner, PORT);
   }
 
-  public TestsReportServer(AbstractTestReportStorage storage) {
-    this(storage, new AgentClassTransformer(), PORT);
+  public TestsReportServer(AbstractTestReportStorage storage, boolean fromRunner, int port) throws Exception {
+    this(storage, new AgentClassTransformer(),
+            new TestIgnorerTransformer(new TestIgnorer(storage)), fromRunner, port);
   }
 
-  public TestsReportServer(AbstractTestReportStorage storage, AgentClassTransformer transformer, int port) {
+  public TestsReportServer(AbstractTestReportStorage storage) throws Exception {
+    this(storage, new AgentClassTransformer(), new TestIgnorerTransformer(new TestIgnorer(storage)), false, PORT);
+  }
+
+  public TestsReportServer(AbstractTestReportStorage storage, AgentClassTransformer usageTransformer,
+                           TestIgnorerTransformer ignorerTransformer, boolean fromRunner, int port) {
     super(port);
     this.storage = storage;
-    this.transformer = transformer;
-    storage.prepare();
+    this.usageTransformer = usageTransformer;
+    status = storage.prepare();
+    this.ignorerTransformer = ignorerTransformer;
+    this.fromRunner = fromRunner;
   }
 
 
@@ -72,9 +90,16 @@ public class TestsReportServer extends NanoHTTPD {
    * @param inst object used to reload modified classes with the @Ignore annotation
    * @throws Exception
    */
-  protected void ignoreTests(Instrumentation inst) throws Exception {
-    inst.addTransformer(transformer);
-    new TestIgnorer(storage).ignoreTests(inst);
+  protected void transformClasses(Instrumentation inst) throws Exception {
+    if (status.equals(ReportStatus.CLEAN)) {
+      inst.addTransformer(usageTransformer);
+    } else {
+      if (!fromRunner) {
+        inst.addTransformer(ignorerTransformer);
+      } else {
+        log.debug("Skipping test ignorer because Junit4Git agent is already running");
+      }
+    }
   }
 
   @Override
@@ -85,12 +110,14 @@ public class TestsReportServer extends NanoHTTPD {
   }
 
   protected void process(JUnitEvent event) {
-    Set<String> referencedClasses = AgentClassTransformer.getReferencedClasses();
-    if (JUnitEventType.START.getName().equals(event.getEventType())) {
-      AgentClassTransformer.cleanUp();
-    } else {
-      storage.appendTestReport(new TestMethodReport(
-              event.getTestClass(), event.getTestMethod(), referencedClasses));
+    if (status.equals(ReportStatus.CLEAN)) {
+      Set<String> referencedClasses = AgentClassTransformer.getReferencedClasses();
+      if (JUnitEventType.START.getName().equals(event.getEventType())) {
+        AgentClassTransformer.cleanUp();
+      } else {
+        storage.appendTestReport(new TestMethodReport(
+                event.getTestClass(), event.getTestMethod(), referencedClasses));
+      }
     }
   }
 
@@ -101,12 +128,13 @@ public class TestsReportServer extends NanoHTTPD {
    * @throws Exception
    */
   public static void agentmain(String agentArgs, Instrumentation inst) throws Exception {
-    TestsReportServer agent = new TestsReportServer();
-    agent.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
     try {
-      agent.ignoreTests(inst);
+
+      TestsReportServer agent = new TestsReportServer(agentArgs.contains("--fromRunner"));
+      agent.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
+      agent.transformClasses(inst);
     } catch (Exception e) {
-      log.error("Error ignoring tests", e);
+      log.error("Error starting the embedded Junit4Git agent", e);
     }
   }
 }

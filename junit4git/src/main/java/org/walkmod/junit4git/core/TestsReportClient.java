@@ -28,19 +28,27 @@ public class TestsReportClient {
   private static final String SERVER_TEST_REPORT_URL = "http://localhost:9000";
 
   public TestsReportClient() {
-    this(new OkHttpClient(), !loaded);
+    this(false);
   }
 
-  public TestsReportClient(OkHttpClient client, boolean startupServer) {
+  public TestsReportClient(boolean fromRunner) {
+    this(new OkHttpClient(), !loaded, fromRunner);
+  }
+
+  public TestsReportClient(OkHttpClient client, boolean startupServer, boolean fromRunner) {
     this.client = client;
     if (startupServer) {
-      startUpAgentServer();
+      startUpAgentServer(fromRunner);
       System.out.println("Junit4Git started [SUCCESS]");
     }
   }
 
-  protected void startUpAgentServer() {
-    AgentLoader.loadAgentClass(TestsReportServer.class.getName(), "");
+  protected void startUpAgentServer(boolean fromRunner) {
+    String options = "";
+    if (fromRunner) {
+      options += "--fromRunner";
+    }
+    AgentLoader.loadAgentClass(TestsReportServer.class.getName(), options);
     loaded = true;
   }
 

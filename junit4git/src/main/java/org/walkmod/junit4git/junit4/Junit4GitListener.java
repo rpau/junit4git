@@ -13,6 +13,10 @@ public class Junit4GitListener extends RunListener {
     this(new TestsReportClient());
   }
 
+  public Junit4GitListener(boolean fromRunner) {
+    this(new TestsReportClient(fromRunner));
+  }
+
   public Junit4GitListener(TestsReportClient client) {
     this.client = client;
   }

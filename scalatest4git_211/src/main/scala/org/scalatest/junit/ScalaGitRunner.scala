@@ -8,7 +8,7 @@ import org.walkmod.junit4git.junit4.Junit4GitListener
 
 class ScalaGitRunner(suiteClass: java.lang.Class[_ <: Suite]) extends org.junit.runner.Runner {
 
-  var listener:Junit4GitListener = new Junit4GitListener()
+  var listener:Junit4GitListener = new Junit4GitListener(true)
 
   val log = LogFactory.getLog(classOf[ScalaGitRunner])
 

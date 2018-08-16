@@ -106,17 +106,16 @@ public class JavassistUtils {
     CtClass clazz = pool.get(className);
 
     if (clazz.isFrozen()) {
-      clazz.defrost();
-      clazz.detach();
+      return clazz.toBytecode();
     }
 
     for (CtConstructor ctConstructor : clazz.getConstructors()) {
       ctConstructor.insertAfter(instrumentationInstruction);
     }
 
-    CtMethod[] methods = clazz.getMethods();
+    CtMethod[] methods = clazz.getDeclaredMethods();
     if (methods != null) {
-      for (CtMethod ctMethod : clazz.getMethods()) {
+      for (CtMethod ctMethod : clazz.getDeclaredMethods()) {
         if (Modifier.isStatic(ctMethod.getModifiers())) {
           ctMethod.insertAfter(instrumentationInstruction, true);
         }

@@ -13,13 +13,14 @@ public class FileTestReportStorage extends AbstractTestReportStorage {
   private File baseReport = new File("smart-testing-report.base.json");
 
   @Override
-  public void prepare() {
+  public ReportStatus prepare() {
     try (Writer writer = buildWriter()) {
       writer.write("");
       writer.flush();
     } catch (IOException e) {
       e.printStackTrace();
     }
+    return ReportStatus.CLEAN;
   }
 
   @Override

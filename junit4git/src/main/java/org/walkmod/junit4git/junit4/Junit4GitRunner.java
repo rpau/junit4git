@@ -14,7 +14,7 @@ public class Junit4GitRunner extends BlockJUnit4ClassRunner {
 
   static {
     try {
-      listener = new Junit4GitListener();
+      listener = new Junit4GitListener(true);
     } catch (Exception e) {
       log.error("Error launching the Runner ", e);
     }

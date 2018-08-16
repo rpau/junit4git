@@ -24,7 +24,6 @@ public class TestIgnorerTransformer implements ClassFileTransformer {
   public TestIgnorerTransformer(TestIgnorer testIgnorer) throws Exception {
     this.testIgnorer = testIgnorer;
     testsToMap = testIgnorer.testsGroupedByClass();
-    log.info("Last Test Impact Analysis: " + testsToMap.size() + " tests");
   }
 
   @Override
@@ -34,7 +33,7 @@ public class TestIgnorerTransformer implements ClassFileTransformer {
     String name = normalizeName(className);
     try {
       if (testsToMap.containsKey(name)) {
-        log.info("Ignoring " + name);
+        log.debug("Ignoring " + name);
         return testIgnorer.ignoreTest(name, testsToMap.get(name));
       }
       return classfileBuffer;
