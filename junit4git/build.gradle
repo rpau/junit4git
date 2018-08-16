@@ -10,6 +10,23 @@ dependencies {
     testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
 }
 
+Map <String, ?> attrs = [ 'Premain-Class': 'org.walkmod.junit4git.core.ignorers.TestIgnorerAgent',
+                          'Can-Retransform-Classes': true,
+                          'Boot-Class-Path': 'junit4git-agent.jar'
+]
+
+task customFatJar(type: Jar) {
+    manifest {
+        attributes attrs
+    }
+    baseName = 'junit4git-agent'
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it)}
+    }
+    exclude ('**/*.RSA')
+    with jar
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {

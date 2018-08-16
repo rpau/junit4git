@@ -1,6 +1,9 @@
 package org.walkmod.junit4git.core.ignorers;
 
 import com.google.gson.Gson;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.bytecode.ClassFile;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -218,28 +221,38 @@ public class TestIgnorerTest {
             .build();
     GitRepo clonedRepo = GitRepoBuilder.clone(repo).build();
 
-    //preparing mocks
-    JavassistUtils javassist = mock(JavassistUtils.class);
+    try {
+      //preparing mocks
+      JavassistUtils javassist = mock(JavassistUtils.class);
+      ClassPool pool = mock(ClassPool.class);
 
-    AbstractTestReportStorage storage = mock(AbstractTestReportStorage.class);
-    TestMethodReport methodReport = new TestMethodReport("Test", "foo", Collections.EMPTY_SET);
-    when(storage.getBaseReport()).thenReturn(new TestMethodReport[]{methodReport});
+      CtClass clazz = mock(CtClass.class);
 
-    //preparing test ignorer
-    TestIgnorer ignorer = new TestIgnorer(clonedRepo.getPath().toFile().getCanonicalPath(),
-            storage, javassist);
+      ClassFile classFile = new ClassFile(false, "java.lang.Object", null);
+      when(clazz.getClassFile()).thenReturn(classFile);
 
-    Instrumentation inst = mock(Instrumentation.class);
-    ignorer.ignoreTests(inst);
+      when(pool.get("Test")).thenReturn(clazz);
 
-    //validating results
-    Map<String, List<TestMethodReport>> testsToIgnore = new HashMap<>();
-    testsToIgnore.put("Test", Arrays.asList(methodReport));
-    verify(javassist).annotateMethods(Ignore.class, inst, testsToIgnore);
+      AbstractTestReportStorage storage = mock(AbstractTestReportStorage.class);
+      TestMethodReport methodReport = new TestMethodReport("Test", "foo", Collections.EMPTY_SET);
+      when(storage.getBaseReport()).thenReturn(new TestMethodReport[]{methodReport});
 
-    //deleting repos
-    repo.delete();
-    clonedRepo.delete();
+      //preparing test ignorer
+      TestIgnorer ignorer = new TestIgnorer(clonedRepo.getPath().toFile().getCanonicalPath(),
+              storage, javassist);
+
+      Instrumentation inst = mock(Instrumentation.class);
+      ignorer.ignoreTest(ignorer.testsGroupedByClass(), "Test", null, inst, pool);
+
+      //validating results
+      Map<String, List<TestMethodReport>> testsToIgnore = new HashMap<>();
+      testsToIgnore.put("Test", Arrays.asList(methodReport));
+      verify(javassist).annotateMethod(Ignore.class, "foo", clazz, classFile.getConstPool());
+    } finally {
+      //deleting repos
+      repo.delete();
+      clonedRepo.delete();
+    }
   }
 
 }
