@@ -6,6 +6,8 @@ import javassist.bytecode.ClassFile;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
 import javassist.bytecode.annotation.Annotation;
+import javassist.expr.ExprEditor;
+import javassist.expr.MethodCall;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.walkmod.junit4git.core.reports.TestMethodReport;
@@ -13,16 +15,13 @@ import org.walkmod.junit4git.core.reports.TestMethodReport;
 import java.io.IOException;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class JavassistUtils {
 
   private static Log log = LogFactory.getLog(JavassistUtils.class);
 
-  public void annotateMethod(Class<?> annotationClass,
+  public boolean annotateMethod(Class<?> annotationClass,
                              String md, CtClass clazz, ConstPool constpool) {
     try {
       CtMethod method = clazz.getDeclaredMethod(md);
@@ -35,11 +34,40 @@ public class JavassistUtils {
 
       methodAttr.addAnnotation(new Annotation(annotationClass.getName(), constpool));
       method.getMethodInfo().addAttribute(methodAttr);
+      return true;
     } catch (NotFoundException e) {
       //the method has been removed
+      log.error("The method " + md + "does not exists in " + clazz.getName());
+      return false;
     } catch (Exception e) {
       throw new RuntimeException("Error adding @" + annotationClass.getName() + " annotations", e);
     }
+  }
+
+  public void replaceMethodCallOnConstructors(String fromMethodName, String toMethodName, CtClass clazz) {
+
+    CtConstructor[] constructors = clazz.getConstructors();
+    for (CtConstructor constructor: constructors) {
+      try {
+        CodeConverter codeConverter = new CodeConverter();
+
+        CtMethod oldMethod = Arrays.stream(clazz.getMethods())
+                .filter(method -> method.getName().equals(fromMethodName))
+                .findFirst().get();
+
+        CtMethod newMethod = Arrays.stream(clazz.getMethods())
+                .filter(method -> method.getName().equals(toMethodName))
+                .findFirst().get();
+
+        codeConverter.redirectMethodCall(oldMethod, newMethod);
+
+        constructor.instrument(codeConverter);
+
+      } catch (CannotCompileException e) {
+        log.error("The constructor of " + clazz.getName() + " cannot be adapted to ignore tests", e);
+      }
+    }
+
   }
 
   public void annotateMethods(Class<?> annotationClass, Instrumentation inst, Map<String,
@@ -60,11 +88,10 @@ public class JavassistUtils {
         testsToMap.get(className).stream()
                 .map(TestMethodReport::getTestMethod)
                 .forEach(md -> annotateMethod(annotationClass, md, clazz, constpool));
-        if (clazz.isFrozen()) {
-          clazz.defrost();
-          clazz.detach();
-        }
+
+        clazz.defrost();
         inst.redefineClasses(new ClassDefinition(Class.forName(className), clazz.toBytecode()));
+        log.info("The test class " + className + " will be ignored");
       } catch (NotFoundException | ClassNotFoundException e) {
         //the class has been removed
       } catch (Throwable e) {

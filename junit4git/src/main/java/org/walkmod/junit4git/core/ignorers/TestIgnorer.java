@@ -1,7 +1,12 @@
 package org.walkmod.junit4git.core.ignorers;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.NotFoundException;
+import javassist.bytecode.ClassFile;
+import javassist.bytecode.ConstPool;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Ignore;
@@ -12,12 +17,10 @@ import org.walkmod.junit4git.jgit.JGitUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,6 +35,8 @@ public class TestIgnorer {
   private final String executionDir;
 
   private final JavassistUtils javassist;
+
+  private static Log log = LogFactory.getLog(TestIgnorer.class);
 
   public TestIgnorer(AbstractTestReportStorage storage) {
     this(".", storage);
@@ -72,7 +77,7 @@ public class TestIgnorer {
   protected Git open() throws IOException, GitAPIException {
     File file = executionDir();
     boolean isGit = new File(file, ".git").exists();
-    while(!isGit && file != null) {
+    while (!isGit && file != null) {
       file = file.getParentFile();
       isGit = new File(file, ".git").exists();
     }
@@ -114,7 +119,7 @@ public class TestIgnorer {
     }
   }
 
-  private Map<String, List<TestMethodReport>> testsGroupedByClass() throws Exception {
+  public Map<String, List<TestMethodReport>> testsGroupedByClass() throws Exception {
     return getTestsToIgnore(storage.getBaseReport()).stream()
             .collect(Collectors.groupingBy(TestMethodReport::getTestClass));
   }
@@ -126,6 +131,73 @@ public class TestIgnorer {
    * @throws Exception in case of modification issues.
    */
   public void ignoreTests(Instrumentation inst) throws Exception {
-    javassist.annotateMethods(Ignore.class, inst, testsGroupedByClass());
+    ClassPool pool = ClassPool.getDefault();
+    ignoreTests(inst, pool);
+  }
+
+  public void ignoreTests(Instrumentation inst, ClassPool pool) throws Exception {
+    Map<String, List<TestMethodReport>> testsToMap = testsGroupedByClass();
+
+    Iterator<String> it = testsToMap.keySet().iterator();
+    while (it.hasNext()) {
+      String className = it.next();
+      ignoreTest(testsToMap, className, Class.forName(className), inst, pool);
+    }
+  }
+
+  public void ignoreTest(Map<String, List<TestMethodReport>> testsToMap, String className, Class<?> loadedClass,
+                          Instrumentation inst, ClassPool pool)  {
+    try {
+      CtClass clazz = pool.get(className);
+      ClassDefinition classDefinition = new ClassDefinition(loadedClass,
+              ignoreTest(clazz, testsToMap.get(className)));
+      inst.redefineClasses(classDefinition);
+      log.info("The test class " + className + " will be ignored");
+    } catch (NotFoundException | ClassNotFoundException e) {
+      //the class has been removed
+    } catch (UnsupportedOperationException e) {
+      log.error("Error reloading the class because it was initially loaded");
+    } catch (Throwable e) {
+      log.error("Error ignoring the test class " + className, e);
+    }
+  }
+
+  public byte[] ignoreTest(CtClass clazz, List<TestMethodReport> methods) throws Exception {
+    String className = clazz.getName();
+    clazz.defrost();
+    ClassFile ccFile = clazz.getClassFile();
+    if (isScalaTest(clazz)) {
+      //TODO: Filter by test method (ie. constructor)
+      javassist.replaceMethodCallOnConstructors("test", "ignore", clazz);
+      log.debug("The scala test class " + className + " has been processed");
+    } else {
+      ConstPool constpool = ccFile.getConstPool();
+      methods.stream()
+              .map(TestMethodReport::getTestMethod)
+              .forEach(md -> javassist.annotateMethod(Ignore.class, md, clazz, constpool));
+    }
+    log.debug("The test class " + className + " will be ignored");
+    return clazz.toBytecode();
+  }
+
+  public byte[] ignoreTest(String className, List<TestMethodReport> methods) throws Exception {
+
+    ClassPool pool = ClassPool.getDefault();
+    CtClass clazz = pool.get(className);
+    return ignoreTest(clazz, methods);
+  }
+
+  public boolean isScalaTest(CtClass clazz) {
+    try {
+      CtClass superClazz = clazz.getSuperclass();
+      while (superClazz != null
+              && !superClazz.getName().equals("org.scalatest.FunSuite")
+              && !superClazz.getName().equals("java.lang.Object")) {
+        superClazz = superClazz.getSuperclass();
+      }
+      return superClazz != null && superClazz.getName().equals("org.scalatest.FunSuite");
+    } catch (Exception e) {
+      return false;
+    }
   }
 }

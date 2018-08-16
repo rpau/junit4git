@@ -147,4 +147,45 @@ public class JavassistUtilsTest {
     Assert.assertEquals(2, clazz.getField(field).get(null));
   }
 
+  @Test
+  public void it_replaces_method_calls() throws Exception {
+    JavassistUtils javassist = new JavassistUtils();
+    ClassPool pool = ClassPool.getDefault();
+
+    CtClass superClass = pool.makeClass("SuperClass");
+
+    superClass.addField(CtField.make("public int x = 0;", superClass));
+
+    superClass.addMethod(CtNewMethod.make(
+            "public int foo() { x += 1; return x; }",
+            superClass));
+
+    superClass.addMethod(CtNewMethod.make(
+            "public int bar() { x += 2; return x;}",
+            superClass));
+
+    superClass.addMethod(CtNewMethod.make(
+            "public int xValue() { return x; }",
+            superClass));
+
+    String instrumentedClass = "InstrumentedClassWithChangedMethods";
+    CtClass evalClass = pool.makeClass(instrumentedClass);
+    evalClass.setSuperclass(superClass);
+
+    evalClass.addConstructor(
+            CtNewConstructor.make("public InstrumentedClassWithChangedMethods() { foo(); foo(); }",
+                    evalClass));
+
+    Class<?> parent = superClass.toClass();
+
+    javassist.replaceMethodCallOnConstructors("foo", "bar", evalClass);
+
+    Class<?> clazz = evalClass.toClass();
+    Object newInstance = clazz.newInstance();
+
+    int x = (int) clazz.getMethod("xValue").invoke(newInstance);
+
+    Assert.assertEquals(4, x);
+  }
+
 }
