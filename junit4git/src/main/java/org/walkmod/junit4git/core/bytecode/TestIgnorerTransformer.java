@@ -34,7 +34,7 @@ public class TestIgnorerTransformer implements ClassFileTransformer {
     String name = normalizeName(className);
     try {
       if (testsToMap.containsKey(name)) {
-        log.info("Ignoring " + name);
+        log.debug("Ignoring " + name);
         return testIgnorer.ignoreTest(name, testsToMap.get(name));
       }
       return classfileBuffer;
