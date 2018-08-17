@@ -36,7 +36,7 @@ class TestIgnorerTest extends MockitoSugar {
 
     testIgnorer.ignoreTests(instrumentation)
 
-    verify(javassist).replaceMethodCallOnConstructors(any(), any(), any())
+    verify(javassist).replaceMethodCallOnConstructors(any(), any(), any(), any())
   }
 
 }

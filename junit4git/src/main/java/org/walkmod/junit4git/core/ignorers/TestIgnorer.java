@@ -167,8 +167,7 @@ public class TestIgnorer {
     clazz.defrost();
     ClassFile ccFile = clazz.getClassFile();
     if (isScalaTest(clazz)) {
-      //TODO: Filter by test method (ie. constructor)
-      javassist.replaceMethodCallOnConstructors("test", "ignore", clazz);
+      javassist.replaceMethodCallOnConstructors("test", "ignore", clazz, methods);
       log.debug("The scala test class " + className + " has been processed");
     } else {
       ConstPool constpool = ccFile.getConstPool();
