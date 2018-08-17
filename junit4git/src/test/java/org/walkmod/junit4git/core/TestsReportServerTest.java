@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.walkmod.junit4git.core.bytecode.AgentClassTransformer;
 import org.walkmod.junit4git.core.reports.AbstractTestReportStorage;
-import org.walkmod.junit4git.core.reports.GitTestReportStorage;
 import org.walkmod.junit4git.core.reports.ReportStatus;
 import org.walkmod.junit4git.core.reports.TestMethodReport;
 

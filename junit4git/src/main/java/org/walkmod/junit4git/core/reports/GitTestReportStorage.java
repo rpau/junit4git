@@ -64,6 +64,18 @@ public class GitTestReportStorage extends AbstractTestReportStorage {
     this.executionDir = executionDir;
   }
 
+  public ReportStatus getStatus() {
+    try (Git git = open()) {
+      if (isClean(git)) {
+        return ReportStatus.CLEAN;
+      } else {
+        return ReportStatus.DIRTY;
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Error resolving the status in " + GIT_NOTES_REF, e);
+    }
+  }
+
   public ReportStatus prepare() {
     try (Git git = open()) {
       Ref ref = fetchNotesRef(git);
@@ -192,21 +204,32 @@ public class GitTestReportStorage extends AbstractTestReportStorage {
     }
   }
 
-  protected boolean isClean(Git git) throws GitAPIException, IOException {
-    String branch = git.getRepository().getBranch();
 
+  protected RevCommit getBaseBranchCommit(Git git) throws IOException {
+    String branch = git.getRepository().getBranch();
     RevWalk walk = new RevWalk(git.getRepository());
     Ref localBaseBranch = getLocalBaseBranchSha(git);
-    RevCommit baseBranchCommit = walk.parseCommit(localBaseBranch.getObjectId());
+    return walk.parseCommit(localBaseBranch.getObjectId());
+  }
 
+  protected boolean isBaseBranch(Git git) throws GitAPIException, IOException {
+    String branch = git.getRepository().getBranch();
+    Ref localBaseBranch = getLocalBaseBranchSha(git);
+    RevCommit baseBranchCommit = getBaseBranchCommit(git);
     boolean isDetachedCommit = (localBaseBranch.getName().equals("refs/heads/" + BASE_BRANCH)
             && baseBranchCommit.getName().equals(branch));
+    return (branch.equals(BASE_BRANCH) || isDetachedCommit);
+  }
 
-    if (branch.equals(BASE_BRANCH) || isDetachedCommit) {
+  protected boolean isClean(Git git) throws GitAPIException, IOException {
+
+    if (isBaseBranch(git)) {
 
       Optional<Ref> baseBranch = getOriginHead(git);
       if (baseBranch.isPresent()) {
 
+        RevWalk walk = new RevWalk(git.getRepository());
+        RevCommit baseBranchCommit = getBaseBranchCommit(git);
 
         RevCommit baseCommit = walk.parseCommit(getBaseObjectId(git));
         log.info(String.format("origin/master sha: [%s], head: [%s]",
@@ -227,6 +250,7 @@ public class GitTestReportStorage extends AbstractTestReportStorage {
         return isClean;
       }
     } else {
+      String branch = git.getRepository().getBranch();
       log.info("The analyzed branch " + branch + " is not "+ BASE_BRANCH);
     }
     return false;

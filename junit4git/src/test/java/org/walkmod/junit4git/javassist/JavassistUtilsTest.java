@@ -157,11 +157,11 @@ public class JavassistUtilsTest {
     superClass.addField(CtField.make("public int x = 0;", superClass));
 
     superClass.addMethod(CtNewMethod.make(
-            "public int foo() { x += 1; return x; }",
+            "public void test(String name) { x += 1; }",
             superClass));
 
     superClass.addMethod(CtNewMethod.make(
-            "public int bar() { x += 2; return x;}",
+            "public void ignore(String name) { x += 2; }",
             superClass));
 
     superClass.addMethod(CtNewMethod.make(
@@ -173,12 +173,17 @@ public class JavassistUtilsTest {
     evalClass.setSuperclass(superClass);
 
     evalClass.addConstructor(
-            CtNewConstructor.make("public InstrumentedClassWithChangedMethods() { foo(); foo(); }",
+            CtNewConstructor.make("public InstrumentedClassWithChangedMethods() { test(\"test1\"); test(\"test2\"); }",
                     evalClass));
 
     Class<?> parent = superClass.toClass();
 
-    javassist.replaceMethodCallOnConstructors("foo", "bar", evalClass);
+    List<TestMethodReport> testsToIgnore = new LinkedList<>();
+
+    testsToIgnore.add(new TestMethodReport("InstrumentedClassWithChangedMethods", "test1", null));
+    testsToIgnore.add(new TestMethodReport("InstrumentedClassWithChangedMethods", "test2", null));
+
+    javassist.replaceMethodCallOnConstructors("test", "ignore", evalClass, testsToIgnore);
 
     Class<?> clazz = evalClass.toClass();
     Object newInstance = clazz.newInstance();

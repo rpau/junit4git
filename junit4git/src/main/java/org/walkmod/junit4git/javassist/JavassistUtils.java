@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class JavassistUtils {
 
@@ -44,24 +45,30 @@ public class JavassistUtils {
     }
   }
 
-  public void replaceMethodCallOnConstructors(String fromMethodName, String toMethodName, CtClass clazz) {
+  public void replaceMethodCallOnConstructors(String fromMethodName, String toMethodName, CtClass clazz,
+                                              List<TestMethodReport> testToReplace) {
 
     CtConstructor[] constructors = clazz.getConstructors();
+    String tests = "new String[] { " + String.join(",", testToReplace.stream()
+            .map(test -> "\""+test.getTestMethod()+"\"")
+            .collect(Collectors.toList())) + "}";
+
     for (CtConstructor constructor: constructors) {
       try {
-        CodeConverter codeConverter = new CodeConverter();
 
-        CtMethod oldMethod = Arrays.stream(clazz.getMethods())
-                .filter(method -> method.getName().equals(fromMethodName))
-                .findFirst().get();
+        constructor.instrument(new ExprEditor() {
 
-        CtMethod newMethod = Arrays.stream(clazz.getMethods())
-                .filter(method -> method.getName().equals(toMethodName))
-                .findFirst().get();
-
-        codeConverter.redirectMethodCall(oldMethod, newMethod);
-
-        constructor.instrument(codeConverter);
+          @Override
+          public void edit(final MethodCall m) throws CannotCompileException {
+            if (m.getMethodName().equals(fromMethodName)) {
+              m.replace("if (java.util.Arrays.asList(" + tests + ").contains($1)){"
+                      + toMethodName + "($$);" +
+                      "} else {" +
+                      fromMethodName + "($$);" +
+                      "}");
+            }
+          }
+        });
 
       } catch (CannotCompileException e) {
         log.error("The constructor of " + clazz.getName() + " cannot be adapted to ignore tests", e);
