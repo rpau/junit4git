@@ -221,7 +221,7 @@ This project is licensed under The Apache Software License.
 This is a Gradle project that you can easily build running
 
 ```bash
-gradle build
+gradle build customFatJar
 ```
 
 Or, if you want to generate a version to test it from a Maven project
