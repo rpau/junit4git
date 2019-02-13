@@ -8,3 +8,9 @@ script:
   - ./gradlew check
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+env:
+  global:
+    - secure: NAS6c+qLypygToua5OAm4FPsZDX95fbubpPHxSInTAAo16Bbg3diIF5vXJddhWeyadiAOTpg38LTfzrXiNg4QVtqWFL2FpGQ1sv3xdEuUfBwVtYLEDHEzqJ1gQxQy6NpIsV7QKV6bX1NoM6yvuwdXj7N7mvLaIFrEkeqe4N8jaHN9RpZT1UpPQmiMekLISnbWT7VjgZlVjM0ZmA2DIxsUwJlVwOoIiUlHxpJMiu7PW+NPAlMbilDowiifjkdRVeMxEiVFPvd61QD1+ReQ1lIVRStIlHJ0E3Qxs7n6QN1MStqXlQI7djBVkzQoc/g7nZAm1/89O/u4NP59rLmYHkD7Wrd+rQK335zfGBZfzobt5xCajD6Z1iu6gljURCeE+awZrnkdZ1/Zz8priXagw/Rzl2arLrT5qGzor4h9C1IwM2GBzfK1A7yYEJYy4wtxuPVk0+6vrHAICrwo1GgA0gru7lW7wI6S1X9E7TKhKBTHN0QSRUaiEAQwlzfjB53A1wMCnXLM7wG/Nz3yTmmGkF6eeJjlviajDbwE7gaiHYrue8FIKdIMZxP1o5gcOeSfcL3gZlgnyHq5BckctSRZMzzveXdRLME+8wcVV36DTJrgBY4zZp3zb43zsXQbEWo2D0ZlcVsHuWZm4T48ob/KLjE5S3oln08mvHWbCE0hUfKfiU=
+
+after_script:
+  - ./fixup.sh
