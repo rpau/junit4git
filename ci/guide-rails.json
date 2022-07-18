@@ -43,13 +43,7 @@
 		"exit_actions": {},
 		"default_properties": [],
 		"deployment_files": [],
-		"application_init": {},
-		"releases": [
-			{
-				"name": "consul",
-				"version": "latest"
-			}
-		]
+		"application_init": {}
 	},
 	"organization": {
 		"orgname": "rpau"
