@@ -1,0 +1,57 @@
+{
+	"metadata": {
+		"version": 1
+	},
+	"application": {
+		"name": "junit4git",
+		"language": "",
+		"artifact_store": {
+			"repositories": null
+		}
+	},
+	"pipeline": {
+		"segments": [
+			{
+				"name": "Build",
+				"segment_type": "build",
+				"exit_actions": {},
+				"deployment_strategy": {},
+				"application_init": {},
+				"packages": [
+					{
+						"name": "((application.name))",
+						"downloads": [],
+						"files": [
+							"((application.name))*"
+						]
+					}
+				],
+				"instance_tags": [
+					{
+						"name": "application.name",
+						"value": "((application.name))"
+					}
+				],
+				"tasks": [
+					{
+						"name": "junit4git",
+						"docker_options": {}
+					}
+				]
+			}
+		],
+		"exit_actions": {},
+		"default_properties": [],
+		"deployment_files": [],
+		"application_init": {},
+		"releases": [
+			{
+				"name": "consul",
+				"version": "latest"
+			}
+		]
+	},
+	"organization": {
+		"orgname": "rpau"
+	}
+}
