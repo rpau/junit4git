@@ -1,9 +1,9 @@
 dependencies {
-    compile project(':junit4git')
-    testCompile group: 'commons-io', name: 'commons-io', version: '2.5'
-    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
-    compile group: 'org.junit.platform', name: 'junit-platform-launcher', version: '1.0.2'
-    testCompile group: 'org.apiguardian', name: 'apiguardian-api', version: '1.0.0'
+    implementation project(':junit4git')
+    testImplementation group: 'commons-io', name: 'commons-io', version: '2.5'
+    testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+    implementation group: 'org.junit.platform', name: 'junit-platform-launcher', version: '1.0.2'
+    testImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: '1.0.0'
 }
 
 publishing {

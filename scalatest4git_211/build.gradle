@@ -1,10 +1,10 @@
 
 dependencies {
-    compile project(':junit4git')
-    compile "org.scalatest:scalatest_2.11:3.0.1"
-    compile group: 'org.javassist', name: 'javassist', version: '3.22.0-GA'
-    testCompile group: 'commons-io', name: 'commons-io', version: '2.5'
-    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+    implementation project(':junit4git')
+    implementation "org.scalatest:scalatest_2.11:3.0.1"
+    implementation group: 'org.javassist', name: 'javassist', version: '3.22.0-GA'
+    testImplementation group: 'commons-io', name: 'commons-io', version: '2.5'
+    testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
 }
 
 publishing {
