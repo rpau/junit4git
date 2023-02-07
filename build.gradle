@@ -44,3 +44,10 @@ subprojects {
 
     check.dependsOn jacocoTestReport
 }
+
+allprojects {
+    tasks.withType(Test).configureEach {
+        forkEvery = 100
+    }
+
+}
